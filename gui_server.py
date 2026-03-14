@@ -45,7 +45,7 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
 CORS(app)
 
-ENGINE = "http://127.0.0.1:5000"
+ENGINE = os.environ.get("ENGINE_URL", "http://127.0.0.1:5000")
 
 # ── State ─────────────────────────────────────────────────────
 thinking_on = False
