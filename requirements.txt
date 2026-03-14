@@ -1,0 +1,11 @@
+openvino>=2025.0.0
+openvino-genai
+openvino-tokenizers
+optimum-intel[openvino,nncf]
+transformers>=4.40.0
+torch
+tokenizers
+huggingface_hub
+pathlib
+typing-extensions
+psutil

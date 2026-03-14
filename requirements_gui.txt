@@ -1,0 +1,6 @@
+# GUI and API Server Requirements
+# Install: pip install -r requirements_gui.txt
+
+flask>=3.0.0
+flask-cors>=4.0.0
+requests>=2.31.0

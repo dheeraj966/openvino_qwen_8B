@@ -1,0 +1,23 @@
+# Python cache and logs
+__pycache__/
+*.py[cod]
+*.log
+app.log
+
+# Virtual environments
+.venv/
+venv/
+openvino_env/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+
+# OpenVINO/model runtime caches and artifacts
+gpu_cache/
+model_cache/
+models/
+
+# Optional local config overrides
+*.local.json

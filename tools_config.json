@@ -1,0 +1,25 @@
+{
+    "server_name": "qwen-tool-server",
+    "version": "1.0.0",
+    "description": "MCP-style tool environment for Qwen inference",
+    "tools": {
+        "time": {
+            "enabled": true,
+            "description": "Returns the current date and time",
+            "triggers": ["time", "date", "today", "day is it", "what day", "current time", "right now"],
+            "auto_inject": true
+        },
+        "system_info": {
+            "enabled": true,
+            "description": "Returns system hardware and memory info",
+            "triggers": ["system info", "hardware", "ram usage", "cpu usage", "memory"],
+            "auto_inject": false
+        },
+        "model_info": {
+            "enabled": true,
+            "description": "Returns current model config, precision, and device info",
+            "triggers": ["model info", "what model", "precision", "which model", "model status"],
+            "auto_inject": false
+        }
+    }
+}

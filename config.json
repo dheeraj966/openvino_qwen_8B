@@ -1,0 +1,8 @@
+{
+    "selected_model": "qwen3_gpu",
+    "max_new_tokens": 256,
+    "temperature": 0.0,
+    "repetition_penalty": 1.1,
+    "max_history": 8,
+    "system_prompt": "You are a brilliant AI assistant. /no_think Keep answers concise and direct."
+}
