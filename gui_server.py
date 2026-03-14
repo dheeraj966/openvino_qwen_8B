@@ -99,7 +99,7 @@ def api_version():
 @app.route("/api/status")
 def api_status():
     try:
-        r = requests.get(f"{ENGINE}/health", timeout=2)
+        r = requests.get(f"{ENGINE}/health", timeout=2, headers=NGROK_HEADERS)
         d = r.json()
     except Exception:
         d = {"status": "disconnected"}
@@ -200,7 +200,7 @@ def api_stop():
     global stop_requested
     stop_requested = True
     try:
-        requests.post(f"{ENGINE}/stop", timeout=15)
+        requests.post(f"{ENGINE}/stop", timeout=15, headers=NGROK_HEADERS)
     except Exception:
         pass
     return jsonify({"ok": True})
@@ -247,7 +247,7 @@ def api_chat():
                 yield f"data: {json.dumps({'tools_triggered': triggered})}\n\n"
             resp = requests.post(
                 f"{ENGINE}/chat",
-                json={"messages": chat_history, "config": cfg},
+                json={"messages": chat_history, "config": cfg}, headers=NGROK_HEADERS,
                 stream=True,
                 timeout=300,
             )
