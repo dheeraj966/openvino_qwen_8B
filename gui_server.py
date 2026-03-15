@@ -14,8 +14,9 @@ import logging
 import signal
 import requests
 from pathlib import Path
-from flask import Flask, render_template, request, Response, stream_with_context, jsonify, make_response
+from flask import Flask, render_template, request, Response, stream_with_context, jsonify, make_response, session
 from flask_cors import CORS
+from flask_session import Session
 
 from tool_server import server as tool_server
 import deep_think
@@ -41,15 +42,20 @@ signal.signal(signal.SIGINT, force_kill)
 signal.signal(signal.SIGTERM, force_kill)
 
 app = Flask(__name__, template_folder='.')
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "some-random-secret")
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = str(Path(__file__).parent / ".flask_session")
+app.config["SESSION_PERMANENT"] = False
+Session(app)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.jinja_env.auto_reload = True
 CORS(app)
 
 ENGINE = os.environ.get("ENGINE_URL", "http://127.0.0.1:5000")
+NGROK_HEADERS = {"ngrok-skip-browser-warning": "true"}
 
 # ── State ─────────────────────────────────────────────────────
 thinking_on = False
-chat_history = []
 stop_requested = False
 deep_think_on = False
 free_think_on = False
@@ -72,11 +78,36 @@ def _sys_prompt():
         )
     return f"{base} {tag}{ti}"
 
-def _reset():
-    global chat_history
-    chat_history = [{"role": "system", "content": _sys_prompt()}]
+def _get_chat_history():
+    if "chat_history" not in session or not isinstance(session.get("chat_history"), list):
+        session["chat_history"] = [{"role": "system", "content": _sys_prompt()}]
+        session.modified = True
+    elif not session["chat_history"]:
+        session["chat_history"] = [{"role": "system", "content": _sys_prompt()}]
+        session.modified = True
+    elif session["chat_history"][0].get("role") != "system":
+        session["chat_history"].insert(0, {"role": "system", "content": _sys_prompt()})
+        session.modified = True
+    return session["chat_history"]
 
-_reset()
+
+def _reset_session_chat():
+    session["chat_history"] = [{"role": "system", "content": _sys_prompt()}]
+    session.modified = True
+
+
+def _update_system_prompt():
+    hist = _get_chat_history()
+    hist[0] = {"role": "system", "content": _sys_prompt()}
+    session["chat_history"] = hist
+    session.modified = True
+
+
+def _append_chat(role, content):
+    hist = _get_chat_history()
+    hist.append({"role": role, "content": content})
+    session["chat_history"] = hist
+    session.modified = True
 
 # ── Routes ────────────────────────────────────────────────────
 @app.route("/")
@@ -98,6 +129,7 @@ def api_version():
 
 @app.route("/api/status")
 def api_status():
+    hist = _get_chat_history()
     try:
         r = requests.get(f"{ENGINE}/health", timeout=2, headers=NGROK_HEADERS)
         d = r.json()
@@ -108,14 +140,14 @@ def api_status():
     d["free_think_on"] = free_think_on
     d["free_think_state"] = free_think.get_state()
     d["tool_server"] = tool_server.server_info
-    d["messages"] = len(chat_history) - 1
+    d["messages"] = max(0, len(hist) - 1)
     return jsonify(d)
 
 @app.route("/api/toggle_think", methods=["POST"])
 def api_toggle_think():
     global thinking_on
     thinking_on = not thinking_on
-    chat_history[0] = {"role": "system", "content": _sys_prompt()}
+    _update_system_prompt()
     return jsonify({"thinking_on": thinking_on})
 
 @app.route("/api/toggle_deep_think", methods=["POST"])
@@ -192,7 +224,7 @@ def api_free_think_stop():
 def api_new_chat():
     global stop_requested
     stop_requested = False
-    _reset()
+    _reset_session_chat()
     return jsonify({"ok": True})
 
 @app.route("/api/stop", methods=["POST"])
@@ -214,14 +246,14 @@ def api_call_tool():
     name = request.json.get("name", "")
     result = tool_server.call_tool(name)
     if result is not None:
-        chat_history.append({"role": "user", "content": f"[Tool '{name}']: {result}"})
-        chat_history.append({"role": "assistant", "content": f"The current {name} is: {result}"})
+        _append_chat("user", f"[Tool '{name}']: {result}")
+        _append_chat("assistant", f"The current {name} is: {result}")
     return jsonify({"name": name, "result": result})
 
 @app.route("/api/reload_tools", methods=["POST"])
 def api_reload_tools():
     tool_server.reload_config()
-    chat_history[0] = {"role": "system", "content": _sys_prompt()}
+    _update_system_prompt()
     return jsonify({"ok": True, "tools": tool_server.list_tools()})
 
 @app.route("/api/chat", methods=["POST"])
@@ -236,7 +268,9 @@ def api_chat():
     for m in tool_server.match_triggers(msg):
         ctx += f"\n[{m['name']}: {m['result']}]"
         triggered.append(m)
-    chat_history.append({"role": "user", "content": msg + ctx if ctx else msg})
+
+    _append_chat("user", msg + ctx if ctx else msg)
+    hist = _get_chat_history()
     Path(".gui_busy").touch()
     def stream():
         global stop_requested
@@ -247,7 +281,8 @@ def api_chat():
                 yield f"data: {json.dumps({'tools_triggered': triggered})}\n\n"
             resp = requests.post(
                 f"{ENGINE}/chat",
-                json={"messages": chat_history, "config": cfg}, headers=NGROK_HEADERS,
+                json={"messages": hist, "config": cfg},
+                headers=NGROK_HEADERS,
                 stream=True,
                 timeout=300,
             )
@@ -265,7 +300,8 @@ def api_chat():
         except Exception as e:
             yield f"data: {json.dumps({'error': str(e)})}\n\n"
         finally:
-            chat_history.append({"role": "assistant", "content": full if full else "(stopped)"})
+            # Always append whatever was generated to keep history balanced
+            _append_chat("assistant", full if full else "(stopped)")
             stop_requested = False
             p = Path(".gui_busy")
             if p.exists(): p.unlink()

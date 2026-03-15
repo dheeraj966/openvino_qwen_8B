@@ -2,5 +2,6 @@
 # Install: pip install -r requirements_gui.txt
 
 flask>=3.0.0
+flask-session>=0.8.0
 flask-cors>=4.0.0
 requests>=2.31.0
