@@ -1,184 +1,192 @@
 # OpenVINO Local LLM Launcher (Windows)
 
-A simple Windows + VSCode friendly launcher to run OpenVINO-converted LLMs (ex: Qwen3) on Intel Iris Xe GPU using `optimum-intel`, with:
-- A `models/` folder (drop any OpenVINO model folder there)
-- Per-model GPU compile cache (faster next runs)
-- A persistent `config.json` so you don't set parameters every run
-- **NEW**: API + GUI server architecture for web-based chat interface
-- **NEW**: Hardware diagnostics tool for GPU/CPU/RAM detection and monitoring
+Windows and VS Code friendly local app for running OpenVINO-converted LLMs (for example Qwen3) with:
 
-## Folder Structure
+- CLI chat launcher
+- API server + web GUI
+- Persistent config in config.json
+- Per-model cache folders for faster warm starts
+- Session-isolated chat history in Flask sessions
+- Session semantic retrieval memory (Method 2) to reduce follow-up latency
 
-Your project should look like:
+## Recent Updates (March 2026)
+
+- Added per-user session chat isolation in gui_server.py using Flask server-side sessions.
+- Added Method 2 session semantic retrieval memory in ram_weight_method2.py.
+- Replaced simulated per-query transfer delay with real retrieval timing metrics.
+- Added page session reset path for new conversation:
+  - Frontend sends page_session_id to /api/new_chat.
+  - Backend resets Method 2 memory for that page session.
+- Added main-view runtime banner for per-query metrics:
+  - Retrieval matched count
+  - Retrieval latency
+  - Generation latency
+  - Stored session turns
+
+## Project Structure
 
 ```
 Qwen_OpenVINO_App/
-│
-├─ launcher.py              # CLI chat launcher
-├─ set_config.py            # Configuration utility
-├─ config.json              # Persistent settings
-├─ api_server.py            # REST API server (NEW)
-├─ gui_server.py            # Web GUI server (NEW)
-├─ requirements.txt         # Core dependencies
-├─ requirements_gui.txt     # GUI/API dependencies (NEW)
-│
-├─ models/
-│ ├─ qwen3_gpu/             (example model folder)
-│ └─ another_model/         (future model folders)
-│
-└─ gpu_cache/
-  ├─ qwen3_gpu/             (per-model cache)
-  └─ another_model/
+|
+|- launcher.py                 # CLI launcher
+|- api_server.py               # Model API server
+|- gui_server.py               # Web GUI server (Flask + SSE)
+|- index.html                  # Primary UI served by gui_server.py
+|- templates/index.html        # Legacy/alternative UI file
+|- set_config.py               # Config helper
+|- config.json                 # Runtime config
+|- ram_weight_method1.py       # Adaptive partial RAM staging policy model
+|- ram_weight_method2.py       # Session semantic retrieval memory strategy
+|- requirements.txt            # Core deps
+|- requirements_gui.txt        # GUI/API deps
+|- models/
+|  |- qwen3_gpu/
+|- gpu_cache/
+|- model_cache/
 ```
 
----
+## Quick Start
 
-## Quick Start Options
+## 1. Create and activate virtual environment
 
-| Option | Command | Description |
-|--------|---------|-------------|
-| **CLI Chat** | `python launcher.py` | Terminal-based chat with model selection |
-| **Web GUI** | See below | Browser-based chat with temporary UI |
+PowerShell:
 
----
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
 
-## Web GUI Setup (NEW)
+## 2. Install dependencies
 
-### 1. Install GUI Dependencies
-
-```bash
+```powershell
+pip install -U pip
+pip install -r requirements.txt
 pip install -r requirements_gui.txt
 ```
 
-### 2. Start the Servers
+## 3. Start servers
 
-**Terminal 1 - API Server:**
-```bash
-python api_server.py
+Terminal 1:
+
+```powershell
+.\.venv\Scripts\python.exe api_server.py
 ```
-- Runs on: `http://127.0.0.1:5000`
-- Provides REST API endpoints
 
-**Terminal 2 - GUI Server:**
-```bash
-python gui_server.py
+Terminal 2:
+
+```powershell
+.\.venv\Scripts\python.exe gui_server.py
 ```
-- Runs on: `http://127.0.0.1:5001`
-- Provides web-based chat interface
 
-### 3. Open in Browser
+Open browser:
 
-Navigate to: **http://127.0.0.1:5001**
+- http://127.0.0.1:8080 (default gui_server.py port)
 
-### API Endpoints
+Note:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/health` | GET | Health check |
-| `/api/models` | GET | List available models |
-| `/api/chat` | POST | Chat completion |
-| `/api/generate` | POST | Text generation |
-| `/api/status` | GET | API status info |
+- In this repo, gui_server.py default port is 8080.
+- If python is not recognized in PowerShell, use .\.venv\Scripts\python.exe explicitly.
 
----
+## API Endpoints (GUI Server)
 
-## CLI Setup (Original)
+| Endpoint | Method | Purpose |
+|---|---|---|
+| /api/status | GET | Engine and UI mode status |
+| /api/chat | POST | Streaming chat endpoint (SSE) |
+| /api/new_chat | POST | Reset session chat and optional Method 2 page memory |
+| /api/toggle_think | POST | Toggle think/no-think |
+| /api/toggle_deep_think | POST | Toggle deep think mode |
+| /api/toggle_free_think | POST | Toggle free think mode |
+| /api/tools | GET | List tools |
+| /api/call_tool | POST | Execute tool |
+| /api/reload_tools | POST | Reload tool config |
 
+## Method 1 vs Method 2
 
+## Method 1: Adaptive RAM staging policy
 
----
+- File: ram_weight_method1.py
+- Purpose: Compute a partial RAM budget plan for weight staging.
+- Status: Policy helper only, not wired to low-level OpenVINO tensor paging.
 
-## Requirements
+## Method 2: Session semantic retrieval memory
 
-- Windows 10/11
-- Python 3.10+ (3.12 is fine)
-- Intel GPU drivers installed
-- OpenVINO + Optimum Intel stack
+- File: ram_weight_method2.py
+- Purpose: Reduce latency and improve continuity by reusing relevant recent turns.
+- Input per query: page_session_id, prompt text.
+- Flow:
+  1. Rank prior turns in the same page session by lightweight similarity.
+  2. Select top-k relevant turns.
+  3. Build compact memory context.
+  4. Inject memory context into the user message for model call.
+  5. Store new query/response pair after generation.
+- Returned metrics:
+  - retrieval_performed
+  - retrieved_count
+  - retrieval_ms
+  - generation_ms (from backend stream end)
+  - stored_turns
 
-Recommended packages:
+Important:
 
+- This is semantic memory retrieval, not per-query model weight paging.
+- True reusable KV cache control depends on lower-level runtime exposure.
 
-pip install -U pip
-pip install -U openvino optimum-intel transformers tokenizers huggingface_hub
-Notes:
+## Session Behavior
 
-If you see warnings about other packages (ludwig/vllm/openvino-dev 2024.x), ignore them or use a fresh virtual environment to keep this project clean.
+- chat_history is stored per Flask session.
+- Method 2 memory is keyed by page_session_id.
+- Clicking New Conversation now resets:
+  - Flask chat history
+  - Method 2 semantic memory for that page session
 
-Add a Model (example: Qwen3 8B OpenVINO INT8)
-Download a pre-converted OpenVINO model (example):
+## Add a Model (example)
 
-
+```powershell
 hf download OpenVINO/Qwen3-8B-int8-ov --local-dir models\qwen3_gpu
-After download, you should see files inside the model folder (varies by model), and it should be loadable by OVModelForCausalLM.from_pretrained().
+```
 
-Configure Once (Persistent Settings)
-python set_config.py
+Then configure defaults:
 
-This creates/updates config.json with values like:
+```powershell
+.\.venv\Scripts\python.exe set_config.py
+```
 
-max_new_tokens
+## CLI Mode
 
-temperature
+```powershell
+.\.venv\Scripts\python.exe launcher.py
+```
 
-repetition_penalty
+## Troubleshooting
 
-system_prompt
+## ModuleNotFoundError: flask_session
 
-You only change this when you want to tune behavior.
+Install in the same interpreter used to run gui_server.py:
 
-Run the Launcher
-text
-python launcher.py
-What happens:
+```powershell
+.\.venv\Scripts\python.exe -m pip install flask-session
+```
 
-Shows a menu of folders found in models/
+Verify:
 
-Loads the selected model on Intel Iris Xe GPU
+```powershell
+.\.venv\Scripts\python.exe -c "from flask_session import Session; print('ok')"
+```
 
-Starts a chat loop
+## Engine still loading for long time
 
-Type:
+- First run on GPU can be slow due to compilation and cache warmup.
+- Reuse same model folder and cache directory between runs.
+- Ensure model path in config.json matches actual models folder name.
 
-quit or exit to stop.
+## No models found
 
-Performance Tips
-First run can take a long time (GPU compilation). After that, it should load faster because the compiled kernels are cached in:
-gpu_cache/<model_name>/
+- Confirm folder exists under models/
+- Example: models/qwen3_gpu/
 
-If a model is too heavy for Iris Xe, try smaller OpenVINO models (e.g., 4B, 3B, etc.) or use INT4 variants if available.
+## License
 
-Troubleshooting
-1) “No models found in 'models'”
-Put your model folder inside models/.
-
-Example:
-models/qwen3_gpu/ (must be a folder, not a zip)
-
-2) “Access is denied” when moving models
-A Python process may still be using the model files.
-Close the running script / terminal, or run:
-
-text
-taskkill /F /IM python.exe
-Then move the folder again.
-
-3) “Can not open file ... openvino_model.bin”
-This usually means the model folder is incomplete or the path is wrong.
-Re-download the model into models/<model_name>/ using hf download.
-
-4) Launcher runs but responses look random
-Some models need a chat template. The launcher tries tokenizer.apply_chat_template() when available and falls back if not.
-
-VSCode Setup
-Open this folder in VSCode
-
-Select the right interpreter:
-Ctrl+Shift+P → “Python: Select Interpreter”
-
-Run from VSCode terminal:
-python launcher.py
-
-License
 Personal / internal project usage.
 
 
