@@ -16,6 +16,10 @@ _loading_status = "idle" # idle, waiting, loading, ready, error
 _loading_error = None
 _load_attempts = 0
 _MAX_LOAD_RETRIES = 2
+_MODEL_ALIASES = {
+    "Qwen3-8B-int4": "qwen3_gpu",
+    "qwen3-8b-int4": "qwen3_gpu",
+}
 
 def is_model_valid(model_path):
     xml_path = Path(model_path) / "openvino_model.xml"
@@ -23,6 +27,35 @@ def is_model_valid(model_path):
     if not xml_path.exists() or not bin_path.exists(): return False
     if xml_path.stat().st_size == 0 or bin_path.stat().st_size == 0: return False
     return True
+
+def resolve_model_dir(selected_model):
+    models_root = Path("models")
+    requested = (selected_model or "").strip()
+    alias = _MODEL_ALIASES.get(requested)
+
+    candidates = []
+    if requested:
+        candidates.append(requested)
+    if alias and alias not in candidates:
+        candidates.append(alias)
+
+    for name in candidates:
+        p = models_root / name
+        if p.exists() and p.is_dir():
+            return p, name
+
+    existing_dirs = sorted([d.name for d in models_root.iterdir() if d.is_dir()]) if models_root.exists() else []
+    valid_dirs = [name for name in existing_dirs if is_model_valid(models_root / name)]
+
+    # If there is only one valid model directory, use it as a safe fallback.
+    if len(valid_dirs) == 1:
+        fallback = valid_dirs[0]
+        return models_root / fallback, fallback
+
+    raise FileNotFoundError(
+        f"selected_model '{requested}' not found under models/. "
+        f"Available directories: {existing_dirs or ['<none>']}"
+    )
 
 def background_load():
     global _persistent_engine, _current_model_path, _loading_status
@@ -33,7 +66,14 @@ def background_load():
         try:
             with open("config.json", "r") as f:
                 config = json.load(f)
-            model_path = str(Path("models") / config["selected_model"])
+            selected_model = config.get("selected_model", "")
+            model_dir, resolved_model_name = resolve_model_dir(selected_model)
+            model_path = str(model_dir)
+            if resolved_model_name != selected_model:
+                print(
+                    f"[*] Resolved selected_model '{selected_model}' -> '{resolved_model_name}'",
+                    flush=True,
+                )
             
             # Wait for conversion
             _loading_status = "waiting"

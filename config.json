@@ -1,5 +1,5 @@
 {
-    "selected_model": "qwen3_gpu",
+    "selected_model": "Qwen3-8B-int4",
     "max_new_tokens": 256,
     "temperature": 0.0,
     "repetition_penalty": 1.1,

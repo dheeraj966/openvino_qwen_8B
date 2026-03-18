@@ -666,6 +666,28 @@ body.light-theme .think-block { background: rgba(99,102,241,0.06); }
 }
 .free-think-stats.hidden { opacity: 0; }
 
+.ram-transfer-banner {
+    position: absolute;
+    top: 34px;
+    left: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(135deg, rgba(8, 47, 73, 0.52), rgba(14, 116, 144, 0.18));
+    border-radius: 10px;
+    color: #c7f9ff;
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    z-index: 101;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.24s ease;
+}
+
+.ram-transfer-banner.active {
+    opacity: 1;
+}
+
 @keyframes infinitySpin {
     0%, 100% { transform: rotate(0deg); }
     50% { transform: rotate(180deg); }
@@ -738,6 +760,7 @@ body.light-theme .think-block { background: rgba(99,102,241,0.06); }
             <div class="deep-think-banner" id="deepThinkBanner">&#9889; DEEP THINK MODE — Extended reasoning active · 16K tokens · High resource usage</div>
             <div class="free-think-banner" id="freeThinkBanner">∞ FREE THINK MODE — Autonomous generation active</div>
             <div class="free-think-stats hidden" id="freeThinkStats">Cycle: 0 · Memory: 0</div>
+            <div class="ram-transfer-banner" id="ramTransferBanner">Session memory retrieval metrics will appear here during chat.</div>
             <header class="chat-header">
                 <div class="header-left">
                     <button class="icon-btn" id="menuToggle" style="position: relative; overflow: hidden; background: transparent; border: none;">
@@ -1396,6 +1419,16 @@ menuToggle.addEventListener('click', () => {
             const stopBtn = document.getElementById('stopBtn');
             const messagesArea = document.getElementById('messagesArea');
             const typingIndicator = document.getElementById('typingIndicator');
+            const ramTransferBanner = document.getElementById('ramTransferBanner');
+            const pageSessionId = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : `page-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+            function showRamTransferBanner(text) {
+                if (!ramTransferBanner) return;
+                ramTransferBanner.textContent = text;
+                ramTransferBanner.classList.add('active');
+            }
 
             let isProcessing = false;
             let abortController = null;
@@ -1781,7 +1814,7 @@ menuToggle.addEventListener('click', () => {
                     const resp = await fetch(chatEndpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: text }),
+                        body: JSON.stringify({ message: text, page_session_id: pageSessionId }),
                         signal: abortController.signal
                     });
 
@@ -1809,9 +1842,22 @@ menuToggle.addEventListener('click', () => {
                                         streamEl.querySelector('.message').prepend(badge);
                                     });
                                 }
+                                if (data.ram_transfer) {
+                                    const rt = data.ram_transfer;
+                                    const statusText = rt.retrieval_performed
+                                        ? `Session retrieval ${rt.retrieval_ms} ms | Query #${rt.query_index} | matched=${rt.retrieved_count} | top similarity=${rt.top_similarity} | RAM ${rt.ram_percent}% (${rt.ram_available_mb} MB free)`
+                                        : `No relevant memory match | Query #${rt.query_index} | RAM ${rt.ram_percent}% (${rt.ram_available_mb} MB free)`;
+                                    showRamTransferBanner(statusText);
+                                }
                                 if (data.chunk) {
                                     parser.feed(data.chunk);
                                     smartScroll();
+                                }
+                                if (data.query_metrics) {
+                                    const qm = data.query_metrics;
+                                    showRamTransferBanner(
+                                        `Completed Query #${qm.query_index} | generation ${qm.generation_ms} ms | retrieval ${qm.last_retrieval_ms} ms | retrieved=${qm.retrieved_count} | stored turns=${qm.stored_turns}`
+                                    );
                                 }
                                 if (data.done) {
                                     parser.flush();
@@ -1863,7 +1909,14 @@ menuToggle.addEventListener('click', () => {
             });
 
             document.getElementById('newChatBtn').addEventListener('click', async () => {
-                try { await fetch('/api/new_chat', { method: 'POST' }); } catch {}
+                try {
+                    await fetch('/api/new_chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page_session_id: pageSessionId })
+                    });
+                    showRamTransferBanner('Session memory reset for this page.');
+                } catch {}
                 const bubbles = messagesArea.querySelectorAll('.message-wrapper');
                 bubbles.forEach(b => b.remove());
                 showEmptyState();

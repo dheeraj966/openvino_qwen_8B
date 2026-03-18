@@ -12,6 +12,7 @@ import os
 import json
 import logging
 import signal
+import time
 import requests
 from pathlib import Path
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify, make_response, session
@@ -21,6 +22,7 @@ from flask_session import Session
 from tool_server import server as tool_server
 import deep_think
 import free_think
+from ram_weight_method2 import SessionRamTransferStrategy
 
 # Suppress noisy polling logs (GET /api/status, /health)
 class _QuietFilter(logging.Filter):
@@ -59,6 +61,7 @@ thinking_on = False
 stop_requested = False
 deep_think_on = False
 free_think_on = False
+ram_method2 = SessionRamTransferStrategy(max_turns_per_session=40, top_k=2)
 
 def _cfg():
     with open(Path(__file__).parent / "config.json") as f:
@@ -224,8 +227,12 @@ def api_free_think_stop():
 def api_new_chat():
     global stop_requested
     stop_requested = False
+    payload = request.json or {} if request.is_json else {}
+    page_session_id = (payload.get("page_session_id") or "").strip()
     _reset_session_chat()
-    return jsonify({"ok": True})
+    if page_session_id:
+        ram_method2.reset_session(page_session_id)
+    return jsonify({"ok": True, "session_memory_reset": bool(page_session_id)})
 
 @app.route("/api/stop", methods=["POST"])
 def api_stop():
@@ -258,7 +265,9 @@ def api_reload_tools():
 
 @app.route("/api/chat", methods=["POST"])
 def api_chat():
-    msg = (request.json.get("message") or "").strip()
+    payload = request.json or {}
+    msg = (payload.get("message") or "").strip()
+    page_session_id = (payload.get("page_session_id") or "").strip() or "default-page-session"
     if not msg:
         return jsonify({"error": "empty"}), 400
     cfg = _cfg()
@@ -269,19 +278,39 @@ def api_chat():
         ctx += f"\n[{m['name']}: {m['result']}]"
         triggered.append(m)
 
-    _append_chat("user", msg + ctx if ctx else msg)
+    user_visible = msg + ctx if ctx else msg
+    _append_chat("user", user_visible)
     hist = _get_chat_history()
+    transfer_info = ram_method2.begin_query(page_session_id=page_session_id, prompt_text=msg)
+    semantic_context = transfer_info.get("semantic_context") or ""
+
+    if semantic_context:
+        model_user_text = (
+            f"{user_visible}\n\n"
+            f"[Retrieved session memory]\n{semantic_context}\n"
+            "[End retrieved session memory]"
+        )
+    else:
+        model_user_text = user_visible
+
+    hist_for_model = [dict(m) for m in hist]
+    if hist_for_model and hist_for_model[-1].get("role") == "user":
+        hist_for_model[-1]["content"] = model_user_text
     Path(".gui_busy").touch()
+
     def stream():
         global stop_requested
         stop_requested = False
         full = ""
+        started_at = time.perf_counter()
         try:
+            yield f"data: {json.dumps({'ram_transfer': transfer_info})}\n\n"
+
             if triggered:
                 yield f"data: {json.dumps({'tools_triggered': triggered})}\n\n"
             resp = requests.post(
                 f"{ENGINE}/chat",
-                json={"messages": hist, "config": cfg},
+                json={"messages": hist_for_model, "config": cfg},
                 headers=NGROK_HEADERS,
                 stream=True,
                 timeout=300,
@@ -302,6 +331,14 @@ def api_chat():
         finally:
             # Always append whatever was generated to keep history balanced
             _append_chat("assistant", full if full else "(stopped)")
+            generation_ms = int((time.perf_counter() - started_at) * 1000)
+            metrics = ram_method2.end_query(
+                page_session_id=page_session_id,
+                generation_ms=generation_ms,
+                user_query=msg,
+                assistant_response=full if full else "(stopped)",
+            )
+            yield f"data: {json.dumps({'query_metrics': metrics})}\n\n"
             stop_requested = False
             p = Path(".gui_busy")
             if p.exists(): p.unlink()
