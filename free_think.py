@@ -22,19 +22,23 @@ Limits:
 """
 
 import gc
+import os
 import json
 import time
 import requests
 from pathlib import Path
 from threading import Lock, Event
 
-ENGINE = "http://127.0.0.1:5000"
+ENGINE = os.environ.get("ENGINE_URL", "http://127.0.0.1:5000")
+NGROK_HEADERS = {"ngrok-skip-browser-warning": "true"}
 
 # ── Persistent connection pool ────────────────────────────────
 # Reuses TCP connections across cycles instead of opening a new
 # socket for every generation + compression call.
 _session = requests.Session()
-_session.headers.update({"Connection": "keep-alive"})
+_session.headers.update({"Connection": "keep-alive", **NGROK_HEADERS})
+
+TRANSIENT_HTTP = {429, 500, 502, 503, 504}
 
 # ── Limits ────────────────────────────────────────────────────
 TOKENS_PER_CYCLE = 2048          # max tokens per thought generation
@@ -122,6 +126,62 @@ def _build_messages():
         {"role": "system", "content": sys_content},
         {"role": "user", "content": user_msg},
     ]
+
+
+def _wait_engine_ready(max_wait_s: int = 20):
+    """Wait briefly for engine readiness so free-think doesn't fail on transient load states."""
+    deadline = time.time() + max_wait_s
+    last_status = "unknown"
+    while time.time() < deadline and not _stop.is_set():
+        try:
+            r = _session.get(f"{ENGINE}/health", timeout=2)
+            if r.status_code == 200:
+                d = r.json()
+                status = d.get("status", "unknown")
+                last_status = status
+                if status == "ready":
+                    return True, status
+            else:
+                last_status = f"http-{r.status_code}"
+        except Exception:
+            last_status = "disconnected"
+        time.sleep(1)
+    return False, last_status
+
+
+def _stream_chat_with_retry(messages, config, timeout_s=300, max_attempts=3):
+    """Retry transient engine HTTP failures before surfacing an error to UI."""
+    last_error = "engine-not-ready"
+    for attempt in range(1, max_attempts + 1):
+        if _stop.is_set():
+            return None, "stopped"
+        try:
+            resp = _session.post(
+                f"{ENGINE}/chat",
+                json={"messages": messages, "config": config},
+                stream=True,
+                timeout=timeout_s,
+            )
+            if resp.status_code == 200:
+                return resp, ""
+
+            body_preview = (resp.text or "").strip().replace("\n", " ")[:120]
+            last_error = f"HTTP {resp.status_code}{': ' + body_preview if body_preview else ''}"
+            resp.close()
+
+            if resp.status_code in TRANSIENT_HTTP and attempt < max_attempts:
+                time.sleep(1.2 * attempt)
+                continue
+            return None, last_error
+        except requests.exceptions.ConnectionError:
+            last_error = "Engine connection lost"
+            if attempt < max_attempts:
+                time.sleep(1.2 * attempt)
+                continue
+            return None, last_error
+        except Exception as e:
+            return None, str(e)
+    return None, last_error
 
 
 def _compress_thought(thought_text: str) -> str:
@@ -263,18 +323,16 @@ def run_cycle():
     messages = _build_messages()
     full = ""
 
-    try:
-        resp = _session.post(
-            f"{ENGINE}/chat",
-            json={"messages": messages, "config": FREE_THINK_CONFIG},
-            stream=True,
-            timeout=300,
-        )
+    ready, engine_state = _wait_engine_ready(max_wait_s=20)
+    if not ready:
+        yield {"error": f"Engine not ready for free-think (state: {engine_state})"}
+        _running = False
+        return
 
-        # Validate before reading stream — engine may be loading (503)
-        if resp.status_code != 200:
-            yield {"error": f"Engine returned HTTP {resp.status_code}"}
-            resp.close()
+    try:
+        resp, err = _stream_chat_with_retry(messages, FREE_THINK_CONFIG, timeout_s=300, max_attempts=3)
+        if resp is None:
+            yield {"error": err}
             _running = False
             return
 
@@ -286,10 +344,6 @@ def run_cycle():
                 full += chunk
                 yield {"chunk": chunk}
 
-    except requests.exceptions.ConnectionError:
-        yield {"error": "Engine connection lost"}
-        _running = False
-        return
     except requests.exceptions.ChunkedEncodingError:
         # Malformed chunk from engine — use what we have so far
         if not full.strip():

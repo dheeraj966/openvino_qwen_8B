@@ -11,11 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --bg: #050507;
@@ -53,15 +49,11 @@
             color: var(--text-main);
             height: 100vh;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             -webkit-font-smoothing: antialiased;
             transition: background 0.5s ease, color 0.5s ease;
-        }
-
-        /* UI Immersion - Disable text selection and set default cursor */
-        * {
+            
+            /* UI Immersion: Disable text selection and set default cursor */
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
@@ -70,611 +62,366 @@
         }
 
         #bgCanvas {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
+            position: absolute; inset: 0; z-index: 0; pointer-events: none;
         }
 
-        /* --- main glass container maximized 98vw × 96vh --- */
+        /* --- main glass container – maximized (98vw / 96vh) --- */
         .app-container {
-            position: relative;
-            z-index: 20;
-            width: 98vw;
-            max-width: 1600px;
-            height: 96vh;
-            border-radius: 32px;
+            position: relative; z-index: 20;
+            width: 98vw; max-width: 1600px; height: 96vh;
+            border-radius: 32px;  /* slightly smaller radius to gain space */
             background: var(--glass-bg);
-            backdrop-filter: blur(45px) saturate(180%);
-            -webkit-backdrop-filter: blur(45px) saturate(180%);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
             border: 1px solid var(--glass-border);
             box-shadow: 0 40px 90px -20px rgba(0,0,0,0.7), inset 0 1px 1px var(--glass-highlight);
-            display: flex;
-            overflow: hidden;
+            display: flex; overflow: hidden;
             transition: background 0.5s ease, border-color 0.5s ease;
         }
 
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 300px;
-            flex-shrink: 0;
-            overflow: hidden;
-            position: relative;
-            z-index: 50;
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-right: none;
-            border-radius: 0 32px 32px 0;
-            box-shadow: none;
-            margin-left: -300px;
-            opacity: 0;
-            pointer-events: none;
-            visibility: hidden;
-            will-change: margin-left, opacity;
-        }
+        /* --- SIDEBAR (same width, same button sizes) --- */
+        /* --- Sidebar Liquid Glass Refraction Fix --- */
+.sidebar {
+    width: 300px;           /* Always full width — no box resize */
+    flex-shrink: 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-right: none;
+    border-radius: 0 32px 32px 0;  /* Permanent — never animated, never clipped */
+    /* Shadow removed */
+    box-shadow: none;
+    margin-left: -300px;   /* Collapsed off-screen via layout, not a mask */
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    will-change: margin-left, opacity;
+}
 
         .sidebar-inner {
             width: 300px;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
             height: 100%;
-            border-radius: 0 32px 32px 0;
-            overflow: hidden;
+            border-radius: 0 32px 32px 0; /* Match parent curve */
+            overflow: hidden; /* Clip internal background bleed */
         }
-
+        /* reduced vertical padding to save space, but button sizes unchanged */
         .sidebar-header {
             padding: 20px 20px 12px;
             border-bottom: none;
         }
-
         .new-chat-btn {
-            width: 100%;
-            background: var(--text-main);
-            color: var(--bg);
-            border: none;
-            padding: 14px;
-            border-radius: 18px;
-            font-weight: 600;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-            margin-bottom: 14px;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
+            width: 100%; background: var(--text-main); color: var(--bg);
+            border: none; padding: 14px; border-radius: 18px;
+            font-weight: 600; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            cursor: pointer; transition: transform 0.2s, opacity 0.2s;
+            margin-bottom: 14px; /* slightly reduced */
+            outline: none; -webkit-tap-highlight-color: transparent;
         }
-
-        .new-chat-btn:hover {
-            transform: scale(1.02);
-            opacity: 0.9;
-        }
-
-        .new-chat-btn:focus, .new-chat-btn:active {
-            outline: none;
-        }
-
+        .new-chat-btn:hover { transform: scale(1.02); opacity: 0.9; }
+        .new-chat-btn:focus, .new-chat-btn:active { outline: none; }
         .search-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--input-bg);
-            padding: 10px 14px;
-            border-radius: 16px;
+            display: flex; align-items: center; gap: 8px;
+            background: var(--input-bg); padding: 10px 14px; border-radius: 16px;
             border: none;
         }
-
         .search-box input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            width: 100%;
-            outline: none;
-            font-size: 0.9rem;
+            background: transparent; border: none; color: var(--text-main);
+            width: 100%; outline: none; font-size: 0.9rem;
         }
-
-        .search-box input::placeholder {
-            color: var(--text-muted);
-        }
+        .search-box input::placeholder { color: var(--text-muted); }
 
         .menu-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            flex: 1; overflow-y: auto; padding: 14px 12px; /* slightly reduced */
+            display: flex; flex-direction: column; gap: 2px;
         }
-
         .history-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.5px;
             padding: 12px 12px 6px;
         }
-
         .menu-item {
-            padding: 14px 16px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid transparent;
-            color: var(--text-muted);
+            padding: 14px 16px; border-radius: 18px;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer; transition: background 0.15s, color 0.15s;
+            border: 1px solid transparent; color: var(--text-muted);
         }
-
-        .menu-item i {
-            font-size: 1.3rem;
-        }
-
+        .menu-item i { font-size: 1.3rem; }
         .menu-item:hover {
-            background: rgba(128,128,128,0.08);
-            color: var(--text-main);
+            background: rgba(128,128,128,0.08); color: var(--text-main);
             border-color: var(--glass-border);
         }
-
         .menu-item.active {
-            background: rgba(128,128,128,0.12);
-            color: var(--text-main);
+            background: rgba(128,128,128,0.12); color: var(--text-main);
             border-color: var(--glass-border);
         }
-
-        .menu-item.favorited {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.3);
-        }
-
-        .menu-item.favorited i {
-            color: #ffd700;
-        }
-
         .sidebar-footer {
             border-top: none;
-            padding: 14px;
+            padding: 14px; /* slightly reduced */
         }
-
         #settingsBtn {
             justify-content: space-between;
         }
 
         /* --- MAIN CHAT --- */
         .main-chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-            background: rgba(0,0,0,0.02);
+            flex: 1; display: flex; flex-direction: column;
+            min-width: 0; background: rgba(0,0,0,0.02);
+            position: relative; /* Anchor absolute children (banners, stats) */
         }
-
+        /* header padding reduced a bit, buttons unchanged */
         .chat-header {
-            padding: 16px 28px;
-            border-bottom: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 16px 28px; border-bottom: none;
+            display: flex; justify-content: space-between; align-items: center;
         }
-
         .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+            display: flex; align-items: center; gap: 16px;
         }
-
         .icon-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: rgba(128,128,128,0.08);
-            border: 1px solid var(--glass-border);
-            color: var(--text-main);
-            font-size: 1.4rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            clip-path: circle(50%);
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(128,128,128,0.08); border: 1px solid var(--glass-border);
+            color: var(--text-main); font-size: 1.4rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
             outline: none;
             -webkit-tap-highlight-color: transparent;
+            /* Soft-Shadow Stack: Diffused realism */
+            /* Shadow removed */
             box-shadow: none;
         }
-
-        .icon-btn:hover {
-            background: rgba(128,128,128,0.15);
-        }
-
-        .icon-btn:focus, .icon-btn:active {
-            outline: none;
-        }
-
-        /* --- EMPTY STATE SUGGESTION CARDS --- */
+        .icon-btn:hover { background: rgba(128,128,128,0.15); }
+        .icon-btn:focus, .icon-btn:active { outline: none; }
+        
+        /* --- EMPTY STATE & SUGGESTION CARDS --- */
         .empty-state {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             padding: 20px;
         }
-
         .hero-title {
-            font-size: 2.2rem;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 40px;
-            line-height: 1.3;
+            font-size: 2.2rem; font-weight: 600; text-align: center;
+            margin-bottom: 40px; line-height: 1.3;
             background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            -webkit-user-select: text;
-            user-select: text;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            /* Allow title text selection */
+            -webkit-user-select: text; user-select: text;
         }
-
         body.light-theme .hero-title {
             background: linear-gradient(135deg, #1a1c22 0%, rgba(26,28,34,0.6) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        .suggestion-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            max-width: 600px;
-            width: 100%;
-        }
 
-        .suggestion-card {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            backdrop-filter: blur(45px);
-            -webkit-backdrop-filter: blur(45px);
-        }
-
-        .suggestion-card i {
-            font-size: 1.5rem;
-            color: var(--accent);
-            padding: 10px;
-            background: rgba(128,128,128,0.1);
-            border-radius: 12px;
-        }
-
-        .suggestion-card .card-text {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: var(--text-main);
-        }
-
-        .suggestion-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(255,255,255,0.2);
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
-        }
-
-        /* --- messages area --- */
+        /* --- messages area – more space by reducing padding --- */
         .messages-area {
-            flex: 1;
-            padding: 22px 28px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            flex: 1; padding: 22px 28px; overflow-y: auto;
+            display: none; flex-direction: column; gap: 20px;
             scroll-behavior: smooth;
         }
-
         .message-wrapper {
-            max-width: 75%;
-            display: flex;
-            flex-direction: column;
+            max-width: 65%; width: fit-content;
+            display: flex; flex-direction: column;
             position: relative;
         }
-
-        .message-wrapper.received {
-            align-self: flex-start;
-        }
-
-        .message-wrapper.sent {
-            align-self: flex-end;
-            align-items: flex-end;
-        }
+        .message-wrapper.received { align-self: flex-start; }
+        .message-wrapper.sent { align-self: flex-end; align-items: flex-end; }
 
         .message {
-            padding: 18px 24px;
-            border-radius: 28px;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(24px) saturate(200%);
-            -webkit-backdrop-filter: blur(24px) saturate(200%);
-            -webkit-user-select: text;
-            user-select: text;
+            padding: 18px 24px; border-radius: 28px;
+            font-size: 0.95rem; line-height: 1.6;
+            /* Removed heavy backdrop-filter for performance */
+            /* Allow message selection */
+            -webkit-user-select: text; user-select: text;
             cursor: text;
         }
-
         .received .message {
+            /* Clear, premium frosted glass */
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
             border: 1px solid rgba(255, 255, 255, 0.12);
+            /* Inner top highlight + deep outer shadow for 3D depth */
             box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.15);
             border-bottom-left-radius: 8px;
         }
-
         .sent .message {
+            /* Subtle theme-tinted glass (not a flat blue) */
             background: linear-gradient(135deg, rgba(0, 210, 255, 0.12) 0%, rgba(0, 210, 255, 0.02) 100%);
             border: 1px solid rgba(0, 210, 255, 0.25);
             box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3);
             border-bottom-right-radius: 8px;
         }
-
         .message-meta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-top: 8px;
-            padding: 0 8px;
+            display: flex; align-items: center; gap: 16px;
+            margin-top: 8px; padding: 0 8px;
             opacity: 0;
-            transform: translateY(6px);
+            transform: translateY(6px); /* Start slightly lower */
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-
-        .message-wrapper:hover .message-meta {
-            opacity: 1;
-            transform: translateY(0);
+        .message-wrapper:hover .message-meta { 
+            opacity: 1; 
+            transform: translateY(0); /* Glide into place */
         }
-
-        .timestamp {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .action-bar {
-            display: flex;
-            gap: 10px;
-        }
-
+        .timestamp { font-size: 0.7rem; color: var(--text-muted); }
+        .action-bar { display: flex; gap: 10px; }
         .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: color 0.2s;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
+            background: none; border: none; color: var(--text-muted);
+            font-size: 1.1rem; cursor: pointer; transition: color 0.2s;
+            outline: none; -webkit-tap-highlight-color: transparent;
         }
-
-        .action-btn:hover {
-            color: var(--text-main);
-        }
-
-        .action-btn:focus, .action-btn:active {
-            outline: none;
-        }
+        .action-btn:hover { color: var(--text-main); }
+        .action-btn:focus, .action-btn:active { outline: none; }
 
         /* typing indicator */
         .typing-indicator {
-            display: none;
-            gap: 5px;
-            padding: 18px 28px;
-            background: var(--msg-bot);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            border-bottom-left-radius: 10px;
-            width: fit-content;
-            margin-bottom: 14px;
+            display: none; gap: 5px; padding: 18px 28px;
+            background: var(--msg-bot); border: 1px solid var(--glass-border);
+            border-radius: 28px; border-bottom-left-radius: 10px;
+            width: fit-content; margin-bottom: 14px; /* reduced */
         }
-
         .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-muted);
-            animation: type 1.4s infinite ease-in-out both;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--text-muted); animation: type 1.4s infinite ease-in-out both;
         }
-
-        .typing-dot:nth-child(1) {
-            animation-delay: -0.32s;
-        }
-
-        .typing-dot:nth-child(2) {
-            animation-delay: -0.16s;
-        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
         /* Tactile button press effect */
         .icon-btn:active, .action-btn:active, .send-btn:active, .new-chat-btn:active {
             transform: scale(0.9) !important;
             transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        @keyframes type {
-            0%, 80%, 100% {
-                transform: scale(0.6);
-                opacity: 0.5;
-            }
-            40% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
+        @keyframes type { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
         .input-controls {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
+            display: flex; gap: 12px; align-items: flex-end;
             padding: 18px 28px 10px;
             position: relative;
             z-index: 10;
         }
-
+        /* 1. The Dark Glass Shell */
         .input-wrapper {
-            position: relative;
-            flex: 1;
-            min-height: 60px;
-            border-radius: 30px;
+            position: relative; flex: 1; min-height: 60px;
+            border-radius: 30px; 
+            /* Ultra-adaptive liquid glass: extreme blur and deep-space tint */
             background: rgba(0, 0, 0, 0.18);
             backdrop-filter: blur(64px) saturate(180%);
             -webkit-backdrop-filter: blur(64px) saturate(180%);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.02), inset 0 -10px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
-            display: flex;
-            align-items: center;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.6),        
+                inset 0 1px 1px rgba(255,255,255,0.02), 
+                inset 0 -10px 40px rgba(0,0,0,0.5),  
+                0 0 0 1px rgba(255,255,255,0.03);
+            display: flex; align-items: center;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
+            overflow: hidden; 
             z-index: 10;
         }
-
+        /* 2. Subtle Fresnel (Edge Reflection) */
         .input-wrapper::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 30px;
-            z-index: 2;
-            pointer-events: none;
+            content: ''; position: absolute; inset: 0;
+            border-radius: 30px; z-index: 2; pointer-events: none;
             background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 210, 255, 0.05) 100%);
         }
 
+        /* Focus state: lifts up and glows slightly cyan */
         .input-wrapper:focus-within {
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 2px 1px rgba(255,255,255,0.1), inset 0 -5px 20px rgba(0,0,0,0.5), 0 0 0 1px rgba(0, 210, 255, 0.3);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.6),        
+                inset 0 2px 1px rgba(255,255,255,0.1), 
+                inset 0 -5px 20px rgba(0,0,0,0.5),  
+                0 0 0 1px rgba(0, 210, 255, 0.3);
             transform: translateY(-2px);
         }
 
+        /* 3. The Gooey Liquid Layer */
+        /* 3. The Gooey Liquid Layer - FIXED NOISE */
         #inputCanvas {
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            width: calc(100% + 20px);
-            height: calc(100% + 20px);
-            border-radius: 30px;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.6;
-            filter: blur(12px) saturate(1.5);
-            mix-blend-mode: overlay;
+            position: absolute; top: -10px; left: -10px;
+            width: calc(100% + 20px); height: calc(100% + 20px);
+            border-radius: 30px; pointer-events: none;
+            z-index: 1; 
+            opacity: 0.4;
+            filter: blur(8px);
+            mix-blend-mode: overlay; 
         }
-
+        
+        /* Ensure inputs stay above the liquid */
         .chat-input, .input-controls .icon-btn i {
-            position: relative;
-            z-index: 3;
+            position: relative; z-index: 3;
         }
-
         .chat-input {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            background: transparent;
-            border: none;
-            padding: 16px 22px;
-            color: var(--text-main);
-            font-size: 1rem;
-            outline: none;
-            resize: none;
-            font-family: inherit;
-            -webkit-user-select: text;
-            user-select: text;
+            position: relative; z-index: 2;
+            width: 100%; background: transparent; border: none;
+            padding: 16px 22px; color: var(--text-main); font-size: 1rem;
+            outline: none; resize: none; font-family: inherit;
+            /* Ensure input is interactive */
+            -webkit-user-select: text; user-select: text;
             cursor: text;
         }
-
-        .chat-input::placeholder {
-            color: var(--text-muted);
-        }
-
+        .chat-input::placeholder { color: var(--text-muted); }
         .send-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--text-main);
-            color: var(--bg);
-            border: none;
-            font-size: 1.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--text-main); color: var(--bg); border: none;
+            font-size: 1.8rem; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
             transition: transform 0.2s, background 0.3s;
-            margin-bottom: 4px;
-            flex-shrink: 0;
+            margin-bottom: 4px; flex-shrink: 0;
+            /* Sync hitbox and suppress highlight */
             clip-path: circle(50%);
             outline: none;
             -webkit-tap-highlight-color: transparent;
+            /* Shadow removed */
             box-shadow: none;
         }
-
-        .send-btn:hover {
-            transform: scale(1.08);
-            background: var(--accent);
-            color: #000;
-        }
-
-        .send-btn:focus, .send-btn:active {
-            outline: none;
-        }
-
+        .send-btn:hover { transform: scale(1.08); background: var(--accent); color: #000; }
+        .send-btn:focus, .send-btn:active { outline: none; }
         .bottom-disclaimer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 12px;
+            text-align: center; font-size: 0.7rem; color: var(--text-muted);
+            margin-top: 12px; /* slightly reduced */
         }
+        /* LIQUID MENU TOGGLE OVERRIDE */
+        
+        
 
         @keyframes morphDrop {
-            0%, 100% {
-                border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            }
-            34% {
-                border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
-            }
-            67% {
-                border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
-            }
+            0%, 100% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+            67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
         }
 
         /* --- SETTINGS MODAL --- */
         .modal-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
+            position: absolute; inset: 0; background: rgba(0,0,0,0.35);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
             z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: 0.3s;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: 0.3s;
         }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
         .settings-modal {
             width: 440px;
+            /* Crystal base — near-zero tint, maximum transmission */
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(64px) saturate(200%);
             -webkit-backdrop-filter: blur(64px) saturate(200%);
-            border: none;
+            border: none;                /* Edges are handled by the four overlay divs */
             border-radius: 36px;
             padding: 36px;
             position: relative;
             overflow: hidden;
             transform: scale(0.95);
             opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12), inset 0 -1px 1px rgba(255, 255, 255, 0.04), 0 40px 80px -20px rgba(0, 0, 0, 0.6);
-            isolation: isolate;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity   0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Soft internal cavity light — depth without a hard border */
+            box-shadow:
+                inset 0  1px 1px rgba(255, 255, 255, 0.12),
+                inset 0 -1px 1px rgba(255, 255, 255, 0.04),
+                      0 40px 80px -20px rgba(0, 0, 0, 0.6);
+            isolation: isolate;          /* Keeps blend modes scoped */
         }
 
         .modal-overlay.active .settings-modal {
@@ -682,276 +429,317 @@
             opacity: 1;
         }
 
+        /* ── Four independent crystal edges ── */
         .crystal-edge {
             position: absolute;
             pointer-events: none;
             z-index: 10;
         }
 
+        /* Depth into the modal — not 1px anymore */
         .crystal-edge.top, .crystal-edge.bottom {
-            left: 0;
-            right: 0;
+            left: 0; right: 0;
             height: 32px;
         }
-
-        .crystal-edge.top {
-            top: 0;
-        }
-
-        .crystal-edge.bottom {
-            bottom: 0;
-        }
+        .crystal-edge.top    { top: 0; }
+        .crystal-edge.bottom { bottom: 0; }
 
         .crystal-edge.left, .crystal-edge.right {
-            top: 0;
-            bottom: 0;
+            top: 0; bottom: 0;
             width: 32px;
         }
+        .crystal-edge.left  { left: 0; }
+        .crystal-edge.right { right: 0; }
 
-        .crystal-edge.left {
-            left: 0;
-        }
-
-        .crystal-edge.right {
-            right: 0;
-        }
-
+        /* Independent corner catchers — sit over the curved junction */
         .crystal-corner {
             position: absolute;
             pointer-events: none;
-            z-index: 11;
+            z-index: 11;   /* Above edges so they blend seamlessly over the junction */
             width: 80px;
             height: 80px;
         }
-
-        .crystal-corner.tl {
-            top: 0;
-            left: 0;
-        }
-
-        .crystal-corner.tr {
-            top: 0;
-            right: 0;
-        }
-
-        .crystal-corner.bl {
-            bottom: 0;
-            left: 0;
-        }
-
-        .crystal-corner.br {
-            bottom: 0;
-            right: 0;
-        }
+        .crystal-corner.tl { top: 0;    left: 0;  }
+        .crystal-corner.tr { top: 0;    right: 0; }
+        .crystal-corner.bl { bottom: 0; left: 0;  }
+        .crystal-corner.br { bottom: 0; right: 0; }
 
         .setting-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 0;
-            border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 0; border-bottom: 1px solid var(--glass-border);
         }
-
-        .setting-row:last-child {
-            border-bottom: none;
-        }
-
+        .setting-row:last-child { border-bottom: none; }
         .toggle {
-            width: 48px;
-            height: 26px;
-            background: rgba(128,128,128,0.3);
-            border-radius: 26px;
-            position: relative;
-            cursor: pointer;
+            width: 48px; height: 26px; background: rgba(128,128,128,0.3);
+            border-radius: 26px; position: relative; cursor: pointer;
             transition: background 0.3s;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
+            outline: none; -webkit-tap-highlight-color: transparent;
         }
-
-        .toggle.active {
-            background: var(--accent);
-        }
-
-        .toggle:focus, .toggle:active {
-            outline: none;
-        }
-
+        .toggle.active { background: var(--accent); }
+        .toggle:focus, .toggle:active { outline: none; }
         .toggle::after {
-            content: '';
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border-radius: 50%;
+            content: ''; position: absolute; top: 3px; left: 3px;
+            width: 20px; height: 20px; background: #fff; border-radius: 50%;
             transition: transform 0.3s;
         }
+        .toggle.active::after { transform: translateX(22px); }
 
-        .toggle.active::after {
-            transform: translateX(22px);
-        }
-
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(128,128,128,0.3);
-            border-radius: 20px;
-        }
-
-        /* --- Light Theme Input Glass Liquid Overrides --- */
-        body.light-theme .input-wrapper {
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 20px; }
+        /* --- Light Theme Input Glass & Liquid Overrides --- */
+body.light-theme .input-wrapper {
+            /* Ultra-adaptive liquid glass (light): extreme blur and softened highlights */
             background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(64px) saturate(140%);
-            -webkit-backdrop-filter: blur(64px) saturate(140%);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,0.3), inset 0 -10px 40px rgba(0,0,0,0.02), 0 0 0 1px rgba(0,0,0,0.03);
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.06),        
+                inset 0 1px 1px rgba(255,255,255,0.3), 
+                inset 0 -10px 40px rgba(0,0,0,0.02),  
+                0 0 0 1px rgba(0,0,0,0.03);
+            transition: box-shadow 0.3s ease;
         }
 
-        body.light-theme .input-wrapper:focus-within {
-            box-shadow: 0 30px 60px rgba(0,0,0,0.1), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -10px 40px rgba(0,0,0,0.04), 0 0 0 1px rgba(0, 122, 255, 0.3);
-        }
+body.light-theme .input-wrapper:focus-within {
+    box-shadow: 
+        0 30px 60px rgba(0,0,0,0.1),        
+        inset 0 1px 1px rgba(255,255,255,0.6), 
+        inset 0 -10px 40px rgba(0,0,0,0.04),  
+        0 0 0 1px rgba(0, 122, 255, 0.3); /* subtle blue rim on focus */
+}
 
-        body.light-theme .input-wrapper::before {
-            background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 122, 255, 0.04) 100%);
-        }
+body.light-theme .input-wrapper::before {
+    background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(0, 122, 255, 0.04) 100%);
+}
 
-        body.light-theme #inputCanvas {
-            mix-blend-mode: multiply;
-            opacity: 0.4;
-            filter: blur(32px) contrast(1.5) saturate(1.2);
-        }
+body.light-theme #inputCanvas {
+    mix-blend-mode: multiply;
+    opacity: 0.3;
+    filter: blur(16px) contrast(10); 
+}
 
-        /* --- Liquid Blob Clip-Path Setup --- */
-        .liquid-blob {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(0,210,255,0.15) 0%, transparent 70%);
-            top: -100px;
-            left: -100px;
-            border-radius: 50%;
-            filter: blur(40px);
-            pointer-events: none;
-            z-index: 0;
-            opacity: 1;
-            transform: scale(1);
-        }
+/* --- Liquid Blob & Clip-Path Setup --- */
+.liquid-blob {
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(0,210,255,0.15) 0%, transparent 70%);
+    top: -100px; left: -100px;
+    border-radius: 50%;
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+    /* Assume sidebar starts open, so opacity is 1 */
+    opacity: 1; 
+    transform: scale(1);
+}
 
-        body.light-theme .liquid-blob {
-            background: radial-gradient(circle, rgba(0,122,255,0.12) 0%, transparent 70%);
-        }
+body.light-theme .liquid-blob {
+    background: radial-gradient(circle, rgba(0,122,255,0.12) 0%, transparent 70%);
+}
 
-        .sidebar-header, .menu-list, .sidebar-footer {
-            position: relative;
-            z-index: 2;
-        }
+/* Ensure menu items float above the blob */
+.sidebar-header, .menu-list, .sidebar-footer {
+    position: relative;
+    z-index: 2;
+}
 
-        /* Optimization */
-        .app-container.is-animating .sidebar,
-        .app-container.is-animating .message,
-        .app-container.is-animating .input-wrapper {
-            backdrop-filter: none !important;
-            -webkit-backdrop-filter: none !important;
-            background: rgba(20, 20, 25, 0.85) !important;
-        }
+/* Optimization: Disable backdrop-filter during layout shifts to prevent stutter */
+.app-container.is-animating .sidebar,
+.app-container.is-animating .message,
+.app-container.is-animating .input-wrapper {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* Use a slightly more solid fallback background to maintain legibility */
+    background: rgba(20, 20, 25, 0.85) !important;
+}
+body.light-theme .app-container.is-animating .sidebar,
+body.light-theme .app-container.is-animating .message,
+body.light-theme .app-container.is-animating .input-wrapper {
+    background: rgba(240, 242, 245, 0.95) !important;
+}
 
-        body.light-theme .app-container.is-animating .sidebar,
-        body.light-theme .app-container.is-animating .message,
-        body.light-theme .app-container.is-animating .input-wrapper {
-            background: rgba(240, 242, 245, 0.95) !important;
-        }
+/* Modal blur: apply direct filter to content so ALL elements (incl. WebGL canvases) are blurred */
+.app-container.modal-blur > .sidebar,
+.app-container.modal-blur > .main-chat {
+    filter: blur(12px);
+    -webkit-filter: blur(12px);
+    transition: filter 0.3s ease;
+    pointer-events: none;
+}
 
-        /* --- CONTEXT MENU --- */
-        .context-menu {
-            position: fixed;
-            background: var(--glass-bg);
-            backdrop-filter: blur(45px) saturate(180%);
-            -webkit-backdrop-filter: blur(45px) saturate(180%);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 6px;
-            display: none;
-            z-index: 1000;
-            min-width: 180px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
+/* ── Qwen3 Backend Integration ── */
+.stop-btn {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: transparent; color: var(--text-muted);
+    border: none;
+    font-size: 1.8rem; cursor: not-allowed;
+    display: none; align-items: center; justify-content: center;
+    transition: all 0.3s; margin-bottom: 4px; flex-shrink: 0;
+    position: relative; overflow: hidden;
+    clip-path: circle(50%); outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.stop-btn.active {
+    display: flex;
+    color: #fff; cursor: pointer;
+    border-color: transparent;
+    animation: stopGlow 1.2s infinite;
+}
+.stop-btn.active:hover { transform: scale(1.08); }
+@keyframes stopGlow { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
 
-        .context-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            color: var(--text-main);
-            font-size: 0.9rem;
-            transition: all 0.2s;
-        }
+.think-block {
+    background: rgba(99,102,241,0.08);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+}
+body.light-theme .think-block { background: rgba(99,102,241,0.06); }
 
-        .context-item:hover {
-            background: rgba(128,128,128,0.15);
-        }
+/* --- FORM CONTROL --- */
+.form-control {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    -webkit-user-select: text; user-select: text; cursor: text;
+}
+.form-control:focus { border-color: var(--accent); }
 
-        .context-item i {
-            font-size: 1.2rem;
-        }
+/* Deep Think pulse animation */
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.15); }
+}
+#deepThinkItem .ph-atom { transition: color 0.3s; }
+.deep-think-banner {
+    width: 100%;
+    max-width: 900px;
+    padding: 7px 16px;
+    background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,60,60,0.08));
+    border: 1px solid rgba(255,107,107,0.26);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ff6b6b;
+    letter-spacing: 0.05em;
+    z-index: 120;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.deep-think-banner.active { opacity: 1; transform: translateY(0); }
 
-        /* --- FORM CONTROL --- */
-        .form-control {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
+.free-think-banner {
+    width: 100%;
+    max-width: 900px;
+    padding: 7px 16px;
+    background: linear-gradient(135deg, rgba(167,139,250,0.15), rgba(139,92,246,0.08));
+    border: 1px solid rgba(167,139,250,0.26);
+    border-radius: 12px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #a78bfa;
+    letter-spacing: 0.05em;
+    z-index: 120;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.28s ease, transform 0.28s ease;
+}
+.free-think-banner.active { opacity: 1; transform: translateY(0); }
 
-        .form-control:focus {
-            border-color: var(--accent);
-        }
+.free-think-stats {
+    position: absolute; 
+    top: 20px;          
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;      
+    
+    
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;           
+    
+    width: max-content; 
+    max-width: 90%;     
+}
+.free-think-stats.hidden { opacity: 0; transform: translateY(-6px); visibility: hidden; }
+.free-think-stats.active { opacity: 1; transform: translateY(0); visibility: visible; }
 
-        /* --- KEYBOARD SHORTCUTS HINT --- */
-        kbd {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 4px;
-            padding: 2px 6px;
-            font-family: monospace;
-            font-size: 0.75rem;
-            margin: 0 2px;
-        }
+.top-overlay-stack {
+    position: absolute;
+    top: 72px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(900px, calc(100% - 32px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 120;
+    pointer-events: none;
+}
 
-        /* --- CHAT PREVIEW TOOLTIP --- */
-        .chat-preview-tooltip {
-            position: fixed;
-            background: var(--glass-bg);
-            backdrop-filter: blur(45px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            max-width: 300px;
-            z-index: 999;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-            font-size: 0.85rem;
-            line-height: 1.4;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-    </style>
-</head>
+.ram-transfer-banner {
+    width: 100%;
+    max-width: 900px;
+    padding: 6px 12px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: linear-gradient(135deg, rgba(8, 47, 73, 0.52), rgba(14, 116, 144, 0.18));
+    border-radius: 12px;
+    color: #c7f9ff;
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    z-index: 121;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.ram-transfer-banner.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+    .top-overlay-stack {
+        top: 64px;
+        width: calc(100% - 20px);
+        gap: 6px;
+    }
+    .deep-think-banner,
+    .free-think-banner,
+    .ram-transfer-banner {
+        font-size: 0.69rem;
+        letter-spacing: 0.01em;
+    }
+}
+
+@keyframes infinitySpin {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+}
+
+</style></head>
 <body>
+
     <canvas id="bgCanvas"></canvas>
+
     <div class="app-container">
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-inner">
@@ -959,21 +747,41 @@
                 <div class="sidebar-header">
                     <button class="new-chat-btn" id="newChatBtn"><i class="ph ph-plus-circle"></i> New Conversation</button>
                     <div class="search-box">
-                        <i class="ph ph-magnifying-glass" style="color: var(--text-muted);"></i>
+                        <i class="ph ph-magnifying-glass" style="color: var(--text-muted)"></i>
                         <input type="text" placeholder="Search history...">
                     </div>
                 </div>
+
                 <div class="menu-list">
-                    <div class="history-label">FEATURES</div>
-                    <div class="menu-item"><i class="ph ph-folder"></i> Folders</div>
-                    <div class="menu-item"><i class="ph ph-star"></i> Favorites</div>
-                    <div class="history-label">RECENT CHATS</div>
+                    <div class="history-label">MODE</div>
+                    <div class="menu-item" id="thinkModeItem" style="justify-content:space-between;">
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <i class="ph ph-brain"></i>
+                            <span id="thinkModeLabel">Instant Mode</span>
+                        </div>
+                        <div class="toggle" id="thinkSwitch"></div>
+                    </div>
+                    <div class="menu-item" id="deepThinkItem" style="justify-content:space-between;">
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <i class="ph ph-atom" style="color:#ff6b6b;"></i>
+                            <span id="deepThinkLabel">Deep Think</span>
+                        </div>
+                        <div class="toggle" id="deepThinkSwitch"></div>
+                    </div>
+                    <div class="menu-item" id="freeThinkItem" style="justify-content:space-between;">
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <i class="ph ph-infinity" style="color:#a78bfa;"></i>
+                            <span id="freeThinkLabel">Free Think</span>
+                        </div>
+                        <div class="toggle" id="freeThinkSwitch"></div>
+                    </div>
+
+                    <div class="history-label">CHATS</div>
                     <div class="menu-item active"><i class="ph ph-chat-circle"></i> New Conversation</div>
-                    <div class="menu-item"><i class="ph ph-chat-circle"></i> Liquid glass UI</div>
-                    <div class="menu-item"><i class="ph ph-chat-circle"></i> Node.js backend</div>
                 </div>
+
                 <div class="sidebar-footer">
-                    <div class="menu-item">
+                    <div class="menu-item" id="apiKeysBtn" style="cursor:pointer;">
                         <div style="display: flex; gap: 12px; align-items: center;">
                             <i class="ph ph-key" style="font-size: 1.5rem;"></i>
                             <span>API Keys</span>
@@ -991,42 +799,32 @@
         </aside>
 
         <main class="main-chat">
+            <div class="top-overlay-stack" id="topOverlayStack">
+                <div class="deep-think-banner" id="deepThinkBanner">&#9889; DEEP THINK MODE — Extended reasoning active · 16K tokens · High resource usage</div>
+                <div class="free-think-banner" id="freeThinkBanner">∞ FREE THINK MODE — Autonomous generation active</div>
+                <div class="free-think-stats hidden" id="freeThinkStats">Cycle: 0 · Memory: 0</div>
+                <div class="ram-transfer-banner" id="ramTransferBanner">Session memory retrieval metrics will appear here during chat.</div>
+            </div>
             <header class="chat-header">
                 <div class="header-left">
                     <button class="icon-btn" id="menuToggle" style="position: relative; overflow: hidden; background: transparent; border: none;">
-                        <canvas id="menuGlassCanvas" style="position: absolute; inset: 0; border-radius: inherit; pointer-events: none;"></canvas>
-                        <i class="ph ph-list" style="position: relative; z-index: 2; color: var(--text-main); transform: rotate(180deg);"></i>
-                    </button>
+    <canvas id="menuGlassCanvas" style="position: absolute; inset: 0; border-radius: inherit; pointer-events: none;"></canvas>
+    <i class="ph ph-list" style="position: relative; z-index: 2; color: var(--text-main); transform: rotate(180deg);"></i>
+</button>
+                    
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
+                    
                     <button class="icon-btn"><i class="ph ph-export"></i></button>
                     <button class="icon-btn"><i class="ph ph-trash"></i></button>
                 </div>
             </header>
-
-            <div class="empty-state" id="emptyState">
-                <h1 class="hero-title">Good afternoon.<br>How can I assist you?</h1>
-                <div class="suggestion-grid">
-                    <div class="suggestion-card">
-                        <i class="ph ph-code"></i>
-                        <div class="card-text">Draft a Node.js backend</div>
-                    </div>
-                    <div class="suggestion-card">
-                        <i class="ph ph-paint-brush"></i>
-                        <div class="card-text">Design a liquid glass UI</div>
-                    </div>
-                    <div class="suggestion-card">
-                        <i class="ph ph-rocket-launch"></i>
-                        <div class="card-text">Explain quantum concepts</div>
-                    </div>
-                    <div class="suggestion-card">
-                        <i class="ph ph-chart-line-up"></i>
-                        <div class="card-text">Analyze market trends</div>
-                    </div>
+                <div class="empty-state" id="emptyState">
+                    <h1 class="hero-title">Good afternoon.<br>How can I assist you?</h1>
                 </div>
-            </div>
-
             <div class="messages-area" id="messagesArea">
+                
+
                 <div class="typing-indicator" id="typingIndicator">
                     <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
                 </div>
@@ -1040,1193 +838,1410 @@
                     <button class="icon-btn" id="micBtn" style="border:none; background:transparent; margin-right:4px;"><i class="ph ph-microphone"></i></button>
                 </div>
                 <button class="send-btn" id="sendBtn" style="position: relative; overflow: hidden; background: transparent;">
-                    <canvas id="sendGlassCanvas" style="position: absolute; inset: 0; border-radius: 50%; pointer-events: none;"></canvas>
-                    <i class="ph ph-arrow-up" style="position: relative; z-index: 2; color: var(--text-main);"></i>
+                  <canvas id="sendGlassCanvas" style="position: absolute; inset: 0; border-radius: 50%; pointer-events: none"></canvas><i class="ph ph-arrow-up" style="position: relative; z-index: 2; color: var(--text-main);"></i>
+                </button>
+                <button class="stop-btn" id="stopBtn" title="Stop generation" style="position:relative;overflow:hidden;">
+                    <canvas id="stopGlassCanvas" style="position:absolute;inset:0;border-radius:50%;pointer-events:none;"></canvas>
+                    <i class="ph ph-stop-circle" style="position:relative;z-index:2;font-size:1.6rem;"></i>
                 </button>
             </div>
-            <div class="bottom-disclaimer">AI can make mistakes. Verify important info.</div>
+            <div class="bottom-disclaimer">Qwen3 &middot; OpenVINO &middot; AI can make mistakes.</div>
         </main>
-    </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-overlay" id="settingsOverlay">
-        <div class="settings-modal" id="settingsModal">
-            <div class="crystal-edge top" id="edgeTop"></div>
-            <div class="crystal-edge bottom" id="edgeBottom"></div>
-            <div class="crystal-edge left" id="edgeLeft"></div>
-            <div class="crystal-edge right" id="edgeRight"></div>
-            <div class="crystal-corner tl" id="cornerTL"></div>
-            <div class="crystal-corner tr" id="cornerTR"></div>
-            <div class="crystal-corner bl" id="cornerBL"></div>
-            <div class="crystal-corner br" id="cornerBR"></div>
+        <div class="modal-overlay" id="settingsOverlay">
+            <div class="settings-modal" id="settingsModal">
+                <!-- Four independent optical edge elements -->
+                <div class="crystal-edge top"    id="edgeTop"></div>
+                <div class="crystal-edge bottom" id="edgeBottom"></div>
+                <div class="crystal-edge left"   id="edgeLeft"></div>
+                <div class="crystal-edge right"  id="edgeRight"></div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="font-size: 1.6rem; font-weight: 600;">Preferences</h2>
-                <button class="icon-btn" id="closeSettings" style="border:none;"><i class="ph ph-x"></i></button>
-            </div>
+                <!-- Curved corner light catchers -->
+                <div class="crystal-corner tl" id="cornerTL"></div>
+                <div class="crystal-corner tr" id="cornerTR"></div>
+                <div class="crystal-corner bl" id="cornerBL"></div>
+                <div class="crystal-corner br" id="cornerBR"></div>
 
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 500;">Light Theme</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Adaptive glass liquid colors</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.6rem; font-weight: 600;">Preferences</h2>
+                    <button class="icon-btn" id="closeSettings" style="border:none;"><i class="ph ph-x"></i></button>
                 </div>
-                <div class="toggle" id="themeToggle"></div>
-            </div>
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 500;">Dynamic Liquid</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Enable canvas background engine</div>
+                <div class="setting-row">
+                    <div>
+                        <div style="font-weight: 500;">Light Theme</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Adaptive glass & liquid colors</div>
+                    </div>
+                    <div class="toggle" id="themeToggle"></div>
                 </div>
-                <div class="toggle active" id="liquidToggle"></div>
+                <div class="setting-row">
+                    <div>
+                        <div style="font-weight: 500;">Dynamic Liquid</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Enable canvas background engine</div>
+                    </div>
+                    <div class="toggle active" id="liquidToggle"></div>
+                </div>
+
             </div>
         </div>
-    </div>
 
-    <!-- API Keys Modal -->
-    <div class="modal-overlay" id="apiKeysOverlay">
-        <div class="settings-modal" style="max-width: 500px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h2 style="font-size: 1.6rem; font-weight: 600;">API Keys</h2>
-                <button class="icon-btn" id="closeApiKeys" style="border:none;"><i class="ph ph-x"></i></button>
-            </div>
-            
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 500;">OpenAI API Key</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Your secret key for GPT models</div>
+        <!-- API Keys Modal -->
+        <div class="modal-overlay" id="apiKeysOverlay">
+            <div class="settings-modal">
+                <div class="crystal-edge top"></div>
+                <div class="crystal-edge bottom"></div>
+                <div class="crystal-edge left"></div>
+                <div class="crystal-edge right"></div>
+                <div class="crystal-corner tl"></div>
+                <div class="crystal-corner tr"></div>
+                <div class="crystal-corner bl"></div>
+                <div class="crystal-corner br"></div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 style="font-size: 1.6rem; font-weight: 600;">API Keys</h2>
+                    <button class="icon-btn" id="closeApiKeys" style="border:none;"><i class="ph ph-x"></i></button>
                 </div>
-            </div>
-            <input type="password" id="openaiKey" placeholder="sk-..." class="form-control" style="margin-bottom: 20px;">
-            
-            <div class="setting-row">
-                <div>
-                    <div style="font-weight: 500;">Anthropic API Key</div>
-                    <div style="font-size: 0.8rem; color: var(--text-muted);">Your secret key for Claude models</div>
+
+                <div class="setting-row">
+                    <div>
+                        <div style="font-weight: 500;">OpenAI API Key</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Your secret key for GPT models</div>
+                    </div>
                 </div>
+                <input type="password" id="openaiKey" placeholder="sk-..." class="form-control" style="margin-bottom: 20px;">
+
+                <div class="setting-row">
+                    <div>
+                        <div style="font-weight: 500;">Anthropic API Key</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Your secret key for Claude models</div>
+                    </div>
+                </div>
+                <input type="password" id="anthropicKey" placeholder="sk-ant-..." class="form-control" style="margin-bottom: 20px;">
+
+                <button class="new-chat-btn" id="saveApiKeys" style="margin-top: 10px;">
+                    <i class="ph ph-floppy-disk"></i> Save Keys
+                </button>
             </div>
-            <input type="password" id="anthropicKey" placeholder="sk-ant-..." class="form-control" style="margin-bottom: 20px;">
-            
-            <button class="new-chat-btn" id="saveApiKeys" style="margin-top: 10px;">
-                <i class="ph ph-floppy-disk"></i> Save Keys
-            </button>
         </div>
     </div>
 
     <script>
-        // ---- GLOBAL VARIABLES ----
-        const emptyState = document.getElementById('emptyState');
-        const inputControls = document.querySelector('.input-controls');
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.getElementById('menuToggle');
-        const liquidBlob = document.getElementById('liquidBlob');
-        const searchBox = document.querySelector('.search-box input');
-        const menuList = document.querySelector('.menu-list');
-        let isFirstMessage = true;
-        let sidebarOpen = false;
-
-        // ---- 1. SEARCH FUNCTIONALITY ----
-        searchBox.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            const chatItems = menuList.querySelectorAll('.menu-item:not(.history-label)');
-            
-            chatItems.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                const matches = text.includes(query);
-                
-                if (query === '') {
-                    item.style.display = 'flex';
-                    item.style.opacity = '1';
-                } else {
-                    gsap.to(item, {
-                        opacity: matches ? 1 : 0.3,
-                        scale: matches ? 1 : 0.95,
-                        duration: 0.2,
-                        display: matches ? 'flex' : 'none'
-                    });
+        (function() {
+          // Logic upgrade: Pause expensive canvas animations when the user leaves the tab
+            document.addEventListener("visibilitychange", () => {
+                const isVisible = document.visibilityState === "visible";
+                // Only pause the background if it exists. (The toggle button still works manually).
+                if (window.bgEngine && document.getElementById('liquidToggle').classList.contains('active')) {
+                    window.bgEngine.setActive(isVisible);
                 }
             });
-        });
 
-        // ---- 2. CONTEXT MENU FOR CHAT ITEMS ----
-        const contextMenu = document.createElement('div');
-        contextMenu.className = 'context-menu';
-        contextMenu.innerHTML = `
-            <div class="context-item" data-action="rename"><i class="ph ph-pencil"></i> Rename</div>
-            <div class="context-item" data-action="favorite"><i class="ph ph-star"></i> Favorite</div>
-            <div class="context-item" data-action="delete"><i class="ph ph-trash"></i> Delete</div>
-            <div class="context-item" data-action="export"><i class="ph ph-export"></i> Export</div>
-        `;
-        document.body.appendChild(contextMenu);
 
-        let currentContextItem = null;
+            const emptyState = document.getElementById('emptyState');
+            const inputControls = document.querySelector('.input-controls');
+            const messagesAreaEl = document.getElementById('messagesArea');
+            let isFirstMessage = true;
 
-        // Add context menu to all chat items
-        function attachContextMenu() {
-            document.querySelectorAll('.menu-item').forEach(item => {
-                if (item.hasAttribute('data-context-attached')) return;
-                item.setAttribute('data-context-attached', 'true');
-                
-                item.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
-                    
-                    // Prevent context menu on system items
-                    if (item.querySelector('.ph-key') || item.querySelector('.ph-user-circle') || 
-                        item.querySelector('.ph-folder') || item.querySelector('.ph-star') ||
-                        item.id === 'settingsBtn') {
-                        return;
-                    }
-                    
-                    currentContextItem = item;
-                    
-                    // Position context menu within viewport bounds
-                    const menuWidth = 180;
-                    const menuHeight = 160;
-                    let left = e.clientX;
-                    let top = e.clientY;
-                    
-                    if (left + menuWidth > window.innerWidth) {
-                        left = window.innerWidth - menuWidth - 10;
-                    }
-                    if (top + menuHeight > window.innerHeight) {
-                        top = window.innerHeight - menuHeight - 10;
-                    }
-                    
-                    contextMenu.style.left = `${left}px`;
-                    contextMenu.style.top = `${top}px`;
-                    contextMenu.style.display = 'block';
-                    
-                    gsap.fromTo(contextMenu, 
-                        { opacity: 0, scale: 0.9 },
-                        { opacity: 1, scale: 1, duration: 0.2 }
-                    );
-                });
-            });
-        }
-
-        // Initial attachment
-        attachContextMenu();
-
-        // Hide context menu on click outside
-        document.addEventListener('click', () => {
-            gsap.to(contextMenu, {
-                opacity: 0,
-                scale: 0.9,
-                duration: 0.15,
-                onComplete: () => contextMenu.style.display = 'none'
-            });
-        });
-
-        // Handle context menu actions
-        contextMenu.addEventListener('click', (e) => {
-            const action = e.target.closest('.context-item')?.dataset.action;
-            if (!action || !currentContextItem) return;
-            
-            switch(action) {
-                case 'rename':
-                    renameChat(currentContextItem);
-                    break;
-                case 'favorite':
-                    toggleFavorite(currentContextItem);
-                    break;
-                case 'delete':
-                    deleteChat(currentContextItem);
-                    break;
-                case 'export':
-                    exportChat(currentContextItem);
-                    break;
+            // ── Global UI: centralised empty-state / chat-view management ──
+            function showChatView() {
+                gsap.killTweensOf([emptyState, messagesAreaEl]);
+                emptyState.style.display = 'none';
+                emptyState.style.opacity = '0';
+                messagesAreaEl.style.display = 'flex';
+                messagesAreaEl.style.opacity = '1';
+                isFirstMessage = false;
             }
-        });
-
-        function renameChat(item) {
-            // Skip if this is the API Keys or Preferences menu item
-            if (item.querySelector('.ph-key') || item.querySelector('.ph-user-circle')) return;
-            
-            const textNode = Array.from(item.childNodes).find(node => node.nodeType === 3);
-            const currentName = textNode ? textNode.textContent.trim() : item.textContent.trim();
-            const newName = prompt('Rename chat:', currentName);
-            
-            if (newName && newName !== currentName) {
-                const icon = item.querySelector('i').cloneNode(true);
-                item.innerHTML = '';
-                item.appendChild(icon);
-                const textNode = document.createTextNode(' ' + newName);
-                item.appendChild(textNode);
-                gsap.from(item, { x: -10, duration: 0.3 });
+            function showEmptyState() {
+                gsap.killTweensOf([emptyState, messagesAreaEl]);
+                messagesAreaEl.style.display = 'none';
+                messagesAreaEl.style.opacity = '0';
+                emptyState.style.display = 'flex';
+                emptyState.style.opacity = '1';
+                emptyState.style.transform = 'translateY(0)';
+                isFirstMessage = true;
             }
-        }
 
-        function toggleFavorite(item) {
-            // Skip system menu items
-            if (item.querySelector('.ph-key') || item.querySelector('.ph-user-circle') || 
-                item.querySelector('.ph-folder') || item.querySelector('.ph-star')) return;
-            
-            const icon = item.querySelector('i');
-            if (!icon) return;
-            
-            const isFavorited = item.classList.toggle('favorited');
-            
-            if (isFavorited) {
-                // Store original class to restore later
-                if (!icon.dataset.originalClass) {
-                    icon.dataset.originalClass = icon.className;
-                }
-                icon.className = 'ph ph-star-fill';
-                gsap.fromTo(icon, 
-                    { scale: 0.5, rotation: -180 },
-                    { scale: 1, rotation: 0, duration: 0.5, ease: 'elastic.out(1, 0.5)' }
-                );
-            } else {
-                // Restore original icon class
-                icon.className = icon.dataset.originalClass || 'ph ph-chat-circle';
-            }
-        }
 
-        function deleteChat(item) {
-            // Prevent deleting system menu items
-            if (item.querySelector('.ph-key') || item.querySelector('.ph-user-circle') || 
-                item.querySelector('.ph-folder') || item.querySelector('.ph-star')) {
-                alert('Cannot delete system menu items.');
-                return;
-            }
-            
-            if (confirm('Delete this chat?')) {
-                gsap.to(item, {
-                    x: -300,
-                    opacity: 0,
-                    duration: 0.4,
-                    onComplete: () => {
-                        item.remove();
-                        // If deleted item was active, activate the first available chat
-                        if (item.classList.contains('active')) {
-                            const firstChat = document.querySelector('.menu-item:not(:has(.ph-key)):not(:has(.ph-user-circle)):not(:has(.ph-folder)):not(:has(.ph-star))');
-                            if (firstChat) firstChat.classList.add('active');
-                        }
-                    }
-                });
-            }
-        }
 
-        function exportChat(item) {
-            const textNode = Array.from(item.childNodes).find(node => node.nodeType === 3);
-            const chatName = textNode ? textNode.textContent.trim() : item.textContent.trim();
-            
-            const messages = Array.from(document.querySelectorAll('.message-wrapper')).map(wrapper => {
-                const type = wrapper.classList.contains('sent') ? 'User' : 'AI';
-                const text = wrapper.querySelector('.message').textContent;
-                const time = wrapper.querySelector('.timestamp')?.textContent || '';
-                return `[${time}] ${type}: ${text}`;
-            }).join('\n\n');
-            
-            if (!messages) {
-                alert('No messages to export for this chat!');
-                return;
-            }
-            
-            // Sanitize filename
-            const sanitizedName = chatName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const blob = new Blob([messages], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${sanitizedName || 'chat'}_${Date.now()}.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            // Visual feedback
-            gsap.to(item, {
-                backgroundColor: 'rgba(0, 210, 255, 0.2)',
-                duration: 0.2,
-                yoyo: true,
-                repeat: 1
-            });
-        }
-
-        // ---- 3. API KEYS MODAL ----
-        document.querySelector('.menu-item:has(.ph-key)').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('apiKeysOverlay').classList.add('active');
-            document.getElementById('openaiKey').value = localStorage.getItem('openai_key') || '';
-            document.getElementById('anthropicKey').value = localStorage.getItem('anthropic_key') || '';
-        });
-
-        document.getElementById('closeApiKeys').addEventListener('click', () => {
-            document.getElementById('apiKeysOverlay').classList.remove('active');
-        });
-        
-        // Close API keys modal on overlay click
-        document.getElementById('apiKeysOverlay').addEventListener('click', (e) => {
-            if (e.target.id === 'apiKeysOverlay') {
-                document.getElementById('apiKeysOverlay').classList.remove('active');
-            }
-        });
-
-        document.getElementById('saveApiKeys').addEventListener('click', () => {
-            const openaiKey = document.getElementById('openaiKey').value.trim();
-            const anthropicKey = document.getElementById('anthropicKey').value.trim();
-            
-            if (!openaiKey && !anthropicKey) {
-                alert('Please enter at least one API key.');
-                return;
-            }
-            
-            if (openaiKey) {
-                if (!openaiKey.startsWith('sk-')) {
-                    alert('OpenAI API key should start with "sk-"');
-                    return;
-                }
-                localStorage.setItem('openai_key', openaiKey);
-            }
-            
-            if (anthropicKey) {
-                if (!anthropicKey.startsWith('sk-ant-')) {
-                    alert('Anthropic API key should start with "sk-ant-"');
-                    return;
-                }
-                localStorage.setItem('anthropic_key', anthropicKey);
-            }
-            
-            const btn = document.getElementById('saveApiKeys');
-            const originalHTML = btn.innerHTML;
-            const originalBg = btn.style.background;
-            
-            btn.innerHTML = '<i class="ph ph-check-circle"></i> Saved!';
-            btn.style.background = 'var(--accent)';
-            btn.disabled = true;
-            
-            setTimeout(() => {
-                btn.innerHTML = originalHTML;
-                btn.style.background = originalBg;
-                btn.disabled = false;
-                document.getElementById('apiKeysOverlay').classList.remove('active');
-            }, 1500);
-        });
-
-        // ---- 4. KEYBOARD SHORTCUTS ----
-        document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                searchBox.focus();
-                searchBox.select();
-            }
-            
-            if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-                e.preventDefault();
-                document.getElementById('newChatBtn').click();
-            }
-            
-            if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-                e.preventDefault();
-                menuToggle.click();
-            }
-            
-            if ((e.ctrlKey || e.metaKey) && e.key === ',') {
-                e.preventDefault();
-                document.getElementById('settingsBtn').click();
-            }
-            
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal-overlay.active').forEach(modal => {
-                    modal.classList.remove('active');
-                });
-            }
-        });
-
-        const shortcutsHint = document.createElement('div');
-        shortcutsHint.style.cssText = 'position: fixed; bottom: 10px; left: 10px; font-size: 0.7rem; color: var(--text-muted); z-index: 5; opacity: 0; transition: opacity 0.3s;';
-        shortcutsHint.innerHTML = `<kbd>⌘K</kbd> Search • <kbd>⌘N</kbd> New • <kbd>⌘B</kbd> Sidebar • <kbd>⌘,</kbd> Settings`;
-        document.body.appendChild(shortcutsHint);
-
-        sidebar.addEventListener('mouseenter', () => {
-            if (sidebarOpen) shortcutsHint.style.opacity = '1';
-        });
-        sidebar.addEventListener('mouseleave', () => {
-            shortcutsHint.style.opacity = '0';
-        });
-
-        // ---- 5. CHAT PREVIEW TOOLTIP ----
-        const previewTooltip = document.createElement('div');
-        previewTooltip.className = 'chat-preview-tooltip';
-        document.body.appendChild(previewTooltip);
-
-        let previewTimeout;
-
-        function attachPreviewTooltip() {
-            document.querySelectorAll('.menu-item').forEach(item => {
-                if (item.hasAttribute('data-preview-attached')) return;
-                item.setAttribute('data-preview-attached', 'true');
-                
-                item.addEventListener('mouseenter', (e) => {
-                    // Don't show preview for system items
-                    if (item.querySelector('.ph-key') || item.querySelector('.ph-user-circle') || 
-                        item.querySelector('.ph-folder') || item.querySelector('.ph-star') ||
-                        item.id === 'settingsBtn') {
-                        return;
-                    }
-                    
-                    clearTimeout(previewTimeout);
-                    previewTimeout = setTimeout(() => {
-                        const textNode = Array.from(item.childNodes).find(node => node.nodeType === 3);
-                        const chatName = textNode ? textNode.textContent.trim() : item.textContent.trim();
-                        const lastMessage = "Last message: This is a preview of the chat content...";
-                        const timestamp = "2 hours ago";
-                        
-                        previewTooltip.innerHTML = `
-                            <div style="font-weight: 600; margin-bottom: 6px;">${chatName}</div>
-                            <div style="color: var(--text-muted); font-size: 0.8rem;">${lastMessage}</div>
-                            <div style="color: var(--text-muted); font-size: 0.75rem; margin-top: 6px;">${timestamp}</div>
-                        `;
-                        
-                        const rect = item.getBoundingClientRect();
-                        let left = rect.right + 10;
-                        let top = rect.top;
-                        
-                        // Keep tooltip within viewport
-                        if (left + 300 > window.innerWidth) {
-                            left = rect.left - 310;
-                        }
-                        if (top + 100 > window.innerHeight) {
-                            top = window.innerHeight - 110;
-                        }
-                        
-                        previewTooltip.style.left = `${left}px`;
-                        previewTooltip.style.top = `${top}px`;
-                        previewTooltip.style.opacity = '1';
-                    }, 800);
-                });
-                
-                item.addEventListener('mouseleave', () => {
-                    clearTimeout(previewTimeout);
-                    previewTooltip.style.opacity = '0';
-                });
-            });
-        }
-
-        attachPreviewTooltip();
-
-        // ---- 6. EXPORT CURRENT CHAT ----
-        const exportBtn = document.querySelector('.icon-btn:has(.ph-export)');
-        exportBtn.addEventListener('click', () => {
-            const messages = Array.from(document.querySelectorAll('.message-wrapper')).map(wrapper => ({
-                role: wrapper.classList.contains('sent') ? 'user' : 'assistant',
-                content: wrapper.querySelector('.message').textContent,
-                timestamp: wrapper.querySelector('.timestamp')?.textContent || ''
-            }));
-            
-            if (messages.length === 0) {
-                alert('No messages to export!');
-                return;
-            }
-            
-            const exportData = {
-                title: document.querySelector('.menu-item.active')?.textContent.trim() || 'Chat Export',
-                timestamp: new Date().toISOString(),
-                messages: messages
-            };
-            
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `chat-${Date.now()}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            gsap.to(exportBtn, {
-                scale: 0.9,
-                duration: 0.1,
-                yoyo: true,
-                repeat: 1
-            });
-        });
-
-        // ---- AUTO-POPULATE SUGGESTION CARDS ----
-        document.querySelectorAll('.suggestion-card').forEach(card => {
-            card.addEventListener('click', () => {
-                chatInput.value = card.querySelector('.card-text').innerText;
-                sendMessage();
-            });
-        });
-
-        // ---- MENU ITEM SELECTION ----
-        function attachMenuItemSelection() {
-            document.querySelectorAll('.menu-item').forEach(item => {
-                if (item.hasAttribute('data-click-attached')) return;
-                item.setAttribute('data-click-attached', 'true');
-                
-                item.addEventListener('click', function(e) {
-                    // Don't change active state for system items
-                    if (this.querySelector('.ph-key') || this.id === 'settingsBtn' ||
-                        this.querySelector('.ph-folder') || this.querySelector('.ph-star')) {
-                        return;
-                    }
-                    
-                    // Remove active from all chat items
-                    document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+          // Make sidebar menu items selectable
+            const menuItems = document.querySelectorAll('.menu-item:not(#settingsBtn)');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active from all
+                    menuItems.forEach(i => i.classList.remove('active'));
+                    // Add active to clicked
                     this.classList.add('active');
                 });
             });
-        }
-        
-        attachMenuItemSelection();
+            // ---- 1. UI STATE & ANIMATIONS (GSAP) ----
+            gsap.from(".app-container", { y: 30, opacity: 0, scale: 0.98, duration: 1, ease: "power3.out" });
 
-        // ---- SIDEBAR ANIMATIONS ----
-        gsap.from('.app-container', { y: 30, opacity: 0, scale: 0.98, duration: 1, ease: 'power3.out' });
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menuToggle');
+            
+            // Initial state: CLOSED (Already set in CSS)
+            let sidebarOpen = false;
+            gsap.set('.menu-item, .history-label', { opacity: 0, x: -10 });
+            gsap.set('#liquidBlob', { opacity: 0, scale: 0.8 });
 
-        gsap.set('.menu-item, .history-label', { opacity: 0, x: -10 });
-        gsap.set(liquidBlob, { opacity: 0, scale: 0.8 });
+            // Fluid Liquid Sidebar Toggle
+            // Fluid Liquid Sidebar Toggle with Pointer Lock
+// Fluid Liquid Sidebar Toggle with Clip-Path Wiping
+menuToggle.addEventListener('click', () => {
+    sidebarOpen = !sidebarOpen;
 
-        menuToggle.addEventListener('click', () => {
-            sidebarOpen = !sidebarOpen;
-            const container = document.querySelector('.app-container');
-            container.classList.add('is-animating');
+    // Performance Optimization: Disable expensive filters during animation
+    const container = document.querySelector('.app-container');
+    container.classList.add('is-animating');
 
-            gsap.killTweensOf([sidebar, liquidBlob, '.menu-item', '.history-label', menuToggle.querySelector('i')]);
-            gsap.fromTo(menuToggle, { scale: 0.7 }, { scale: 1, duration: 0.8, ease: 'elastic.out(1.2, 0.4)' });
+    // Robustness: Kill any ongoing animations
+    gsap.killTweensOf([sidebar, '#liquidBlob', '.menu-item', '.history-label', menuToggle.querySelector('i')]);
 
-            if (sidebarOpen) {
-                sidebar.style.visibility = 'visible';
-                sidebar.style.pointerEvents = 'all';
-                gsap.to(sidebar, {
-                    marginLeft: 0,
-                    opacity: 1,
-                    duration: 0.6,
-                    ease: 'power3.out',
-                    onComplete: () => container.classList.remove('is-animating')
-                });
-                gsap.to(liquidBlob, { opacity: 1, scale: 1, duration: 0.8 });
-                gsap.fromTo('.menu-item, .history-label',
-                    { opacity: 0, x: -20 },
-                    { opacity: 1, x: 0, duration: 0.4, delay: 0.1, stagger: 0.03, ease: 'power2.out' }
-                );
-                gsap.to(menuToggle.querySelector('i'), { rotation: 0, duration: 0.6, ease: 'power3.out' });
-            } else {
-                sidebar.style.pointerEvents = 'none';
-                gsap.to('.menu-item, .history-label', { opacity: 0, x: -15, duration: 0.2, stagger: 0.01 });
-                gsap.to(liquidBlob, { opacity: 0, scale: 0.7, duration: 0.3 });
-                gsap.to(sidebar, {
-                    marginLeft: -300,
-                    opacity: 0,
-                    duration: 0.5,
-                    ease: 'power3.inOut',
-                    onComplete: () => {
-                        if (!sidebarOpen) sidebar.style.visibility = 'hidden';
-                        container.classList.remove('is-animating');
+    gsap.fromTo(menuToggle, { scale: 0.7 }, { scale: 1, duration: 0.8, ease: "elastic.out(1.2, 0.4)" });
+
+    if (sidebarOpen) {
+        sidebar.style.visibility = "visible";
+        sidebar.style.pointerEvents = "all";
+
+        gsap.to(sidebar, {
+            marginLeft: 0,
+            opacity: 1,
+            duration: 0.6,
+            ease: "power3.out", // Snappier, more predictable ease
+            onComplete: () => container.classList.remove('is-animating')
+        });
+
+        gsap.to('#liquidBlob', { opacity: 1, scale: 1, duration: 0.8 });
+        gsap.fromTo('.menu-item, .history-label', 
+            { opacity: 0, x: -20 },
+            { opacity: 1, x: 0, duration: 0.4, delay: 0.1, stagger: 0.03, ease: "power2.out" }
+        );
+        gsap.to(menuToggle.querySelector('i'), { rotation: 0, duration: 0.6, ease: "power3.out" });
+    } else {
+        sidebar.style.pointerEvents = "none";
+        gsap.to('.menu-item, .history-label', { opacity: 0, x: -15, duration: 0.2, stagger: 0.01 });
+        gsap.to('#liquidBlob', { opacity: 0, scale: 0.7, duration: 0.3 });
+
+        gsap.to(sidebar, {
+            marginLeft: -300,
+            opacity: 0,
+            duration: 0.5,
+            ease: "power3.inOut",
+            onComplete: () => {
+                if (!sidebarOpen) sidebar.style.visibility = "hidden";
+                container.classList.remove('is-animating');
+            }
+        });
+
+        gsap.to(menuToggle.querySelector('i'), { rotation: 180, duration: 0.5, ease: "power3.inOut" });
+    }});
+            // Settings modal
+            const settingsOverlay = document.getElementById('settingsOverlay');
+            const appContainer = document.querySelector('.app-container');
+
+            function setModalBlur(active) {
+                if (active) appContainer.classList.add('modal-blur');
+                else appContainer.classList.remove('modal-blur');
+            }
+
+            document.getElementById('settingsBtn').addEventListener('click', () => { settingsOverlay.classList.add('active'); setModalBlur(true); });
+            document.getElementById('closeSettings').addEventListener('click', () => { settingsOverlay.classList.remove('active'); setModalBlur(false); });
+            settingsOverlay.addEventListener('click', (e) => { if (e.target === settingsOverlay) { settingsOverlay.classList.remove('active'); setModalBlur(false); } });
+
+            // ── API Keys Modal ──
+            const apiKeysOverlay = document.getElementById('apiKeysOverlay');
+            document.getElementById('apiKeysBtn').addEventListener('click', () => {
+                apiKeysOverlay.classList.add('active');
+                setModalBlur(true);
+                document.getElementById('openaiKey').value = localStorage.getItem('openai_key') || '';
+                document.getElementById('anthropicKey').value = localStorage.getItem('anthropic_key') || '';
+            });
+            document.getElementById('closeApiKeys').addEventListener('click', () => { apiKeysOverlay.classList.remove('active'); setModalBlur(false); });
+            apiKeysOverlay.addEventListener('click', (e) => { if (e.target === apiKeysOverlay) { apiKeysOverlay.classList.remove('active'); setModalBlur(false); } });
+            document.getElementById('saveApiKeys').addEventListener('click', () => {
+                const ok = document.getElementById('openaiKey').value.trim();
+                const ak = document.getElementById('anthropicKey').value.trim();
+                if (ok) localStorage.setItem('openai_key', ok);
+                if (ak) localStorage.setItem('anthropic_key', ak);
+                const btn = document.getElementById('saveApiKeys');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="ph ph-check-circle"></i> Saved!';
+                btn.style.background = 'var(--accent)';
+                btn.disabled = true;
+                setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.disabled = false; apiKeysOverlay.classList.remove('active'); setModalBlur(false); }, 1500);
+            });
+
+            // ── Crystal Modal: Independent Optical Edge Reflections ──
+            (function initCrystalEdges() {
+                const modal = document.getElementById('settingsModal');
+                const bgCanvas = document.getElementById('bgCanvas');
+
+                const edges = {
+                    top:    document.getElementById('edgeTop'),
+                    bottom: document.getElementById('edgeBottom'),
+                    left:   document.getElementById('edgeLeft'),
+                    right:  document.getElementById('edgeRight'),
+                };
+                const corners = {
+                    tl: document.getElementById('cornerTL'),
+                    tr: document.getElementById('cornerTR'),
+                    bl: document.getElementById('cornerBL'),
+                    br: document.getElementById('cornerBR'),
+                };
+
+                const state = {
+                    top:    { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
+                    bottom: { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
+                    left:   { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
+                    right:  { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
+                    tl:     { intensity: 0, color: {r:1,g:1,b:1} },
+                    tr:     { intensity: 0, color: {r:1,g:1,b:1} },
+                    bl:     { intensity: 0, color: {r:1,g:1,b:1} },
+                    br:     { intensity: 0, color: {r:1,g:1,b:1} },
+                };
+
+                const GATE_PX       = 120;  // Tight proximity: only near the tab
+                const DEPTH_PX      = 28;   
+                const SPOT_PX       = 88;   
+                const CORNER_SPREAD = 52;   
+                const MAX_ALPHA     = 0.35; // Reduced overall brightness
+
+                function sampleColor(x, y) {
+                    if (!bgCanvas) return {r:1,g:1,b:1};
+                    const ctx = bgCanvas.getContext('2d');
+                    try {
+                        const data = ctx.getImageData(Math.max(0, x), Math.max(0, y), 1, 1).data;
+                        return { r: data[0]/255, g: data[1]/255, b: data[2]/255 };
+                    } catch(e) { return {r:1,g:1,b:1}; }
+                }
+
+                function buildEdgeGradient(edge) {
+                    const s = state[edge];
+                    const c = s.color;
+                    const color = `rgba(${c.r*255},${c.g*255},${c.b*255},${(s.intensity * MAX_ALPHA).toFixed(3)})`;
+                    const pct = (s.pos * 100).toFixed(2) + '%';
+
+                    if (edge === 'top' || edge === 'bottom') {
+                        const anchorY = edge === 'top' ? '0%' : '100%';
+                        return `radial-gradient(ellipse ${SPOT_PX}px ${DEPTH_PX}px at ${pct} ${anchorY}, ${color} 0%, transparent 100%)`;
+                    } else {
+                        const anchorX = edge === 'left' ? '0%' : '100%';
+                        return `radial-gradient(ellipse ${DEPTH_PX}px ${SPOT_PX}px at ${anchorX} ${pct}, ${color} 0%, transparent 100%)`;
                     }
-                });
-                gsap.to(menuToggle.querySelector('i'), { rotation: 180, duration: 0.5, ease: 'power3.inOut' });
-            }
-        });
-
-        // ---- SETTINGS MODAL ----
-        const settingsOverlay = document.getElementById('settingsOverlay');
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            settingsOverlay.classList.add('active');
-        });
-
-        document.getElementById('closeSettings').addEventListener('click', () => {
-            settingsOverlay.classList.remove('active');
-        });
-
-        settingsOverlay.addEventListener('click', (e) => {
-            if (e.target === settingsOverlay) {
-                settingsOverlay.classList.remove('active');
-            }
-        });
-
-        // ---- CRYSTAL MODAL EDGES ----
-        function initCrystalEdges() {
-            const modal = document.getElementById('settingsModal');
-            const bgCanvas = document.getElementById('bgCanvas');
-            const edges = {
-                top: document.getElementById('edgeTop'),
-                bottom: document.getElementById('edgeBottom'),
-                left: document.getElementById('edgeLeft'),
-                right: document.getElementById('edgeRight')
-            };
-            const corners = {
-                tl: document.getElementById('cornerTL'),
-                tr: document.getElementById('cornerTR'),
-                bl: document.getElementById('cornerBL'),
-                br: document.getElementById('cornerBR')
-            };
-
-            const state = {
-                top: { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
-                bottom: { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
-                left: { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
-                right: { pos: 0.5, intensity: 0, color: {r:1,g:1,b:1} },
-                tl: { intensity: 0, color: {r:1,g:1,b:1} },
-                tr: { intensity: 0, color: {r:1,g:1,b:1} },
-                bl: { intensity: 0, color: {r:1,g:1,b:1} },
-                br: { intensity: 0, color: {r:1,g:1,b:1} }
-            };
-
-            const GATEPX = 120;
-            const DEPTHPX = 28;
-            const SPOTPX = 88;
-            const CORNERSPREAD = 52;
-            const MAXALPHA = 0.35;
-
-            function sampleColor(x, y) {
-                if (!bgCanvas) return {r:1,g:1,b:1};
-                const ctx = bgCanvas.getContext('2d');
-                try {
-                    const data = ctx.getImageData(Math.max(0, x), Math.max(0, y), 1, 1).data;
-                    return {r: data[0]/255, g: data[1]/255, b: data[2]/255};
-                } catch(e) {
-                    return {r:1,g:1,b:1};
                 }
-            }
 
-            function buildEdgeGradient(edge) {
-                const s = state[edge];
-                const c = s.color;
-                const color = `rgba(${c.r*255},${c.g*255},${c.b*255},${(s.intensity * MAXALPHA).toFixed(3)})`;
-                const pct = (s.pos * 100).toFixed(2);
-
-                if (edge === 'top' || edge === 'bottom') {
-                    const anchorY = edge === 'top' ? 0 : 100;
-                    return `radial-gradient(ellipse ${SPOTPX}px ${DEPTHPX}px at ${pct}% ${anchorY}%, ${color} 0%, transparent 100%)`;
-                } else {
-                    const anchorX = edge === 'left' ? 0 : 100;
-                    return `radial-gradient(ellipse ${DEPTHPX}px ${SPOTPX}px at ${anchorX}% ${pct}%, ${color} 0%, transparent 100%)`;
+                function buildCornerGradient(corner) {
+                    const s = state[corner];
+                    const c = s.color;
+                    const color = `rgba(${c.r*255},${c.g*255},${c.b*255},${(s.intensity * MAX_ALPHA).toFixed(3)})`;
+                    const cx = (corner === 'tl' || corner === 'bl') ? '0%' : '100%';
+                    const cy = (corner === 'tl' || corner === 'tr') ? '0%' : '100%';
+                    return `radial-gradient(circle at ${cx} ${cy}, ${color} 0%, transparent ${CORNER_SPREAD}px)`;
                 }
-            }
 
-            function buildCornerGradient(corner) {
-                const s = state[corner];
-                const c = s.color;
-                const color = `rgba(${c.r*255},${c.g*255},${c.b*255},${(s.intensity * MAXALPHA).toFixed(3)})`;
-                const cx = (corner === 'tl' || corner === 'bl') ? 0 : 100;
-                const cy = (corner === 'tl' || corner === 'tr') ? 0 : 100;
-                return `radial-gradient(circle at ${cx}% ${cy}%, ${color} 0%, transparent ${CORNERSPREAD}px)`;
-            }
-
-            gsap.ticker.add(() => {
-                ['top','bottom','left','right'].forEach(e => {
-                    edges[e].style.background = buildEdgeGradient(e);
-                });
-                ['tl','tr','bl','br'].forEach(c => {
-                    corners[c].style.background = buildCornerGradient(c);
-                });
-            });
-
-            function onMouseMove(e) {
-                const rect = modal.getBoundingClientRect();
-                const mx = e.clientX, my = e.clientY;
-                const dTop = my - rect.top;
-                const dBottom = rect.bottom - my;
-                const dLeft = mx - rect.left;
-                const dRight = rect.right - mx;
-                const posX = Math.min(1, Math.max(0, (mx - rect.left) / rect.width));
-                const posY = Math.min(1, Math.max(0, (my - rect.top) / rect.height));
-
-                const getIntensity = (d) => Math.max(0, 1 - Math.abs(d) / GATEPX);
-                const currentSample = sampleColor(mx, my);
-
-                ['top','bottom','left','right'].forEach(key => {
-                    const d = key === 'top' ? dTop : key === 'bottom' ? dBottom : key === 'left' ? dLeft : dRight;
-                    gsap.to(state[key], {
-                        pos: (key==='top'||key==='bottom') ? posX : posY,
-                        intensity: getIntensity(d),
-                        duration: 0.4,
-                        overwrite: 'auto'
+                let _tickCount = 0;
+                gsap.ticker.add(() => {
+                    if (++_tickCount % 3 !== 0) return; // only update every 3rd frame
+                    ['top','bottom','left','right'].forEach(e => {
+                        edges[e].style.background = buildEdgeGradient(e);
                     });
-                    state[key].color = currentSample;
-                });
-
-                ['tl','tr','bl','br'].forEach(key => {
-                    const cornerX = (key==='tl'||key==='bl') ? rect.left : rect.right;
-                    const cornerY = (key==='tl'||key==='tr') ? rect.top : rect.bottom;
-                    const dist = Math.hypot(mx - cornerX, my - cornerY);
-                    gsap.to(state[key], {
-                        intensity: Math.max(0, 1 - dist / GATEPX),
-                        duration: 0.4,
-                        overwrite: 'auto'
+                    ['tl','tr','bl','br'].forEach(c => {
+                        corners[c].style.background = buildCornerGradient(c);
                     });
-                    state[key].color = currentSample;
                 });
-            }
 
-            function onMouseLeave() {
-                Object.values(state).forEach(s => {
-                    gsap.to(s, { intensity: 0, duration: 0.8, overwrite: 'auto' });
+                let _lastMoveTime = 0;
+                function onMouseMove(e) {
+                    const now = performance.now();
+                    if (now - _lastMoveTime < 30) return; // throttle to ~33Hz
+                    _lastMoveTime = now;
+                    const rect = modal.getBoundingClientRect();
+                    const mx = e.clientX, my = e.clientY;
+
+                    const dTop    = my - rect.top;
+                    const dBottom = rect.bottom - my;
+                    const dLeft   = mx - rect.left;
+                    const dRight  = rect.right - mx;
+
+                    const posX = Math.min(1, Math.max(0, (mx - rect.left) / rect.width));
+                    const posY = Math.min(1, Math.max(0, (my - rect.top)  / rect.height));
+
+                    const getIntensity = (d) => Math.max(0, 1 - Math.abs(d) / GATE_PX);
+
+                    // Update intensities and sample colors at cursor position
+                    const currentSample = sampleColor(mx, my);
+
+                    ['top','bottom','left','right'].forEach(key => {
+                        const d = key === 'top' ? dTop : key === 'bottom' ? dBottom : key === 'left' ? dLeft : dRight;
+                        gsap.to(state[key], { 
+                            pos: (key==='top'||key==='bottom') ? posX : posY, 
+                            intensity: getIntensity(d), 
+                            duration: 0.4, 
+                            overwrite: "auto" 
+                        });
+                        state[key].color = currentSample;
+                    });
+
+                    ['tl','tr','bl','br'].forEach(key => {
+                        const cornerX = (key==='tl'||key==='bl') ? rect.left : rect.right;
+                        const cornerY = (key==='tl'||key==='tr') ? rect.top : rect.bottom;
+                        const dist = Math.hypot(mx - cornerX, my - cornerY);
+                        gsap.to(state[key], { 
+                            intensity: Math.max(0, 1 - dist / GATE_PX), 
+                            duration: 0.4, 
+                            overwrite: "auto" 
+                        });
+                        state[key].color = currentSample;
+                    });
+                }
+
+                function onMouseLeave() {
+                    Object.values(state).forEach(s => {
+                        gsap.to(s, { intensity: 0, duration: 0.8, overwrite: "auto" });
+                    });
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseleave', onMouseLeave);
+            })();
+
+            // --- MENU ITEM HOVER INTERACTIONS ---
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    gsap.to(item, { x: 5, duration: 0.3, ease: "power1.out", overwrite: "auto" });
                 });
-            }
-
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseleave', onMouseLeave);
-        }
-
-        // ---- MENU ITEM HOVER INTERACTIONS ----
-        document.querySelectorAll('.menu-item').forEach(item => {
-            item.addEventListener('mouseenter', () => {
-                gsap.to(item, { x: 5, duration: 0.3, ease: 'power1.out' });
-                const icon = item.querySelector('i');
-                if (icon) gsap.to(icon, { rotation: 15, duration: 0.3, ease: 'back.out(2)' });
+                item.addEventListener('mouseleave', () => {
+                    gsap.to(item, { x: 0, duration: 0.3, ease: "power2.out", overwrite: "auto" });
+                });
             });
 
-            item.addEventListener('mouseleave', () => {
-                gsap.to(item, { x: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
-                const icon = item.querySelector('i');
-                if (icon) gsap.to(icon, { rotation: 0, duration: 0.5, ease: 'elastic.out(1, 0.4)' });
+            // ---- 2. TOGGLES ----
+            const themeToggle = document.getElementById('themeToggle');
+            const liquidToggle = document.getElementById('liquidToggle');
+            const body = document.body;
+
+            document.querySelectorAll('.toggle:not(#themeToggle):not(#thinkSwitch):not(#deepThinkSwitch):not(#freeThinkSwitch)').forEach(t => {
+                t.addEventListener('click', function(e) { e.stopPropagation(); this.classList.toggle('active'); });
             });
-        });
 
-        // ---- TOGGLES ----
-        const themeToggle = document.getElementById('themeToggle');
-        const liquidToggle = document.getElementById('liquidToggle');
-        const body = document.body;
-
-        document.querySelectorAll('.toggle:not(#themeToggle)').forEach(t => {
-            t.addEventListener('click', function(e) {
+            themeToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 this.classList.toggle('active');
+                body.classList.toggle('light-theme');
+                if (window.bgEngine) window.bgEngine.updateTheme(body.classList.contains('light-theme'));
             });
-        });
 
-        themeToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            this.classList.toggle('active');
-            body.classList.toggle('light-theme');
-            if (window.bgEngine) {
-                window.bgEngine.updateTheme(body.classList.contains('light-theme'));
-            }
-        });
+            liquidToggle.addEventListener('click', function(e) {
+                // The generic toggle listener already flips the 'active' class, 
+                // so we just read the state here.
+                if (window.bgEngine) window.bgEngine.setActive(this.classList.contains('active'));
+            });
 
-        liquidToggle.addEventListener('click', function(e) {
-            if (window.bgEngine) {
-                window.bgEngine.setActive(this.classList.contains('active'));
-            }
-        });
 
-        // ---- LIQUID BACKGROUND ENGINE ----
-        class LiquidBackground {
-            constructor() {
-                this.canvas = document.getElementById('bgCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.time = 0;
-                this.active = true;
-                this.lightMode = false;
-
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-
-                for (let i = 0; i < 45; i++) {
-                    this.particles.push(this.createParticle());
+            // ---- 3. LIQUID BACKGROUND ENGINE (unchanged) ----
+            class LiquidBackground {
+                constructor() {
+                    this.canvas = document.getElementById('bgCanvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    this.particles = [];
+                    this.time = 0;
+                    this.active = true;
+                    this.lightMode = false;
+                    this._lastFrame = 0;
+                    this.resize();
+                    window.addEventListener('resize', () => this.resize());
+                    for (let i = 0; i < 18; i++) this.particles.push(this.createParticle());
+                    this.animate();
                 }
-
-                this.animate();
-            }
-
-            resize = () => {
-                this.width = window.innerWidth;
-                this.height = window.innerHeight;
-                this.canvas.width = this.width;
-                this.canvas.height = this.height;
-            }
-
-            createParticle() {
-                const colorChoices = [140, 210];
-                return {
-                    x: Math.random() * this.width,
-                    y: Math.random() * this.height,
-                    vx: (Math.random() - 0.5) * 1.5,
-                    vy: (Math.random() - 0.5) * 1.5,
-                    size: 200 + Math.random() * 250,
-                    seed: Math.random() * 1000,
-                    baseHue: colorChoices[Math.floor(Math.random() * colorChoices.length)]
-                };
-            }
-
-            updateTheme(isLight) {
-                this.lightMode = isLight;
-            }
-
-            setActive(active) {
-                this.active = active;
-            }
-
-            animate = () => {
-                if (!this.active) {
-                    this.ctx.clearRect(0, 0, this.width, this.height);
-                    requestAnimationFrame(this.animate);
-                    return;
+                resize() {
+                    this.width = window.innerWidth;
+                    this.height = window.innerHeight;
+                    this.canvas.width = this.width;
+                    this.canvas.height = this.height;
                 }
+                createParticle() {
+                    const colorChoices = [140, 210]; // Green, Blue
+                    return {
+                        x: Math.random() * this.width,
+                        y: Math.random() * this.height,
+                        vx: (Math.random() - 0.5) * 1.5,
+                        vy: (Math.random() - 0.5) * 1.5,
+                        size: 200 + Math.random() * 250, // Increased size for more blur area
+                        seed: Math.random() * 1000,
+                        baseHue: colorChoices[Math.floor(Math.random() * colorChoices.length)]
+                    };
+                }
+                updateTheme(isLight) { this.lightMode = isLight; }
+                setActive(active) { this.active = active; }
 
-                this.time += 0.002;
+                animate() {
+                    if (!this.active) {
+                        this.ctx.clearRect(0, 0, this.width, this.height);
+                        requestAnimationFrame(() => this.animate());
+                        return;
+                    }
+                    const now = performance.now();
+                    if (now - this._lastFrame < 33) { // cap ~30fps
+                        requestAnimationFrame(() => this.animate());
+                        return;
+                    }
+                    this._lastFrame = now;
+                    this.time += 0.002;
 
-                this.ctx.globalCompositeOperation = 'source-over';
-                this.ctx.fillStyle = this.lightMode ? 'rgba(238, 240, 245, 0.2)' : 'rgba(1, 1, 2, 0.4)';
-                this.ctx.fillRect(0, 0, this.width, this.height);
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.ctx.fillStyle = this.lightMode ? 'rgba(238, 240, 245, 0.2)' : 'rgba(1, 1, 2, 0.4)';
+                    this.ctx.fillRect(0, 0, this.width, this.height);
 
-                this.ctx.globalCompositeOperation = this.lightMode ? 'multiply' : 'screen';
+                    this.ctx.globalCompositeOperation = this.lightMode ? 'multiply' : 'screen';
 
-                this.particles.forEach(p => {
-                    const noise = Math.sin(p.x * 0.001 + this.time) + Math.cos(p.y * 0.001 + this.time);
-                    p.vx += Math.cos(noise * Math.PI) * 0.05;
-                    p.vy += Math.sin(noise * Math.PI) * 0.05;
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.99;
-                    p.vy *= 0.99;
+                    this.particles.forEach(p => {
+                        // Organic full-screen drift
+                        const noise = Math.sin(p.x * 0.001 + this.time) * Math.cos(p.y * 0.001 + this.time);
+                        p.vx += Math.cos(noise * Math.PI) * 0.05;
+                        p.vy += Math.sin(noise * Math.PI) * 0.05;
 
-                    if (p.x < -400) p.x = this.width + 400;
-                    if (p.x > this.width + 400) p.x = -400;
-                    if (p.y < -400) p.y = this.height + 400;
-                    if (p.y > this.height + 400) p.y = -400;
+                        p.x += p.vx; p.y += p.vy;
+                        p.vx *= 0.99; p.vy *= 0.99;
 
-                    let hue, sat, lightness, opacity;
-                    const localTime = this.time + p.seed * 0.1;
+                        // Improved wrapping: ensure they cover the full width from 0 to width
+                        if (p.x < -400) p.x = this.width + 400;
+                        if (p.x > this.width + 400) p.x = -400;
+                        if (p.y < -400) p.y = this.height + 400;
+                        if (p.y > this.height + 400) p.y = -400;
 
-                    if (this.lightMode) {
-                        hue = p.baseHue;
-                        sat = 0;
-                        lightness = 5 + Math.sin(localTime * 2) * 5;
-                        opacity = 0.06 + Math.sin(localTime) * 0.04;
-                    } else {
-                        hue = p.baseHue + Math.sin(localTime * 1.5) * 45;
-                        hue = hue % 360;
-                        sat = 60;
-                        lightness = 10;
-                        opacity = 0.12;
+                        let hue, sat, lightness, opacity;
+                        const localTime = this.time + (p.seed * 0.1);
+                        
+                        if (this.lightMode) {
+                            // Diverse dark blobs for light mode (randomized opacity/lightness)
+                            hue = p.baseHue;
+                            sat = '0%';
+                            lightness = (5 + Math.sin(localTime * 2) * 5) + '%';
+                            opacity = (0.06 + Math.sin(localTime) * 0.04);
+                        } else {
+                            // Diverse floating Green/Blue for dark mode with higher randomness
+                            hue = (p.baseHue + Math.sin(localTime * 1.5) * 45) % 360; 
+                            sat = '60%'; 
+                            lightness = '10%'; 
+                            opacity = 0.12;
+                        }
+
+                        const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+                        grad.addColorStop(0, `hsla(${hue}, ${sat}, ${lightness}, ${opacity})`);
+                        grad.addColorStop(0.6, `hsla(${hue}, ${sat}, ${lightness}, ${opacity * 0.3})`); // Softer falloff for more blur
+                        grad.addColorStop(1, 'transparent');
+                        
+                        this.ctx.fillStyle = grad;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    });
+
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+
+            window.bgEngine = new LiquidBackground();
+
+            // ---- 4. INPUT CANVAS (micro‑interactions) ----
+            // ---- 4. INPUT CANVAS (Gooey Liquid Integration) ----
+            class InputLiquid {
+                constructor() {
+                    this.wrapper = document.querySelector('.input-wrapper');
+                    this.canvas = document.getElementById('inputCanvas');
+                    this.ctx = this.canvas.getContext('2d');
+                    this.particles = [];
+                    this.time = 0;
+                    
+                    this.resize();
+                    window.addEventListener('resize', () => this.resize());
+
+                    // Create 4 permanent ambient blobs that slowly drift
+                    for(let i=0; i<4; i++) {
+                        this.addParticle(false);
                     }
 
-                    const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
-                    grad.addColorStop(0, `hsla(${hue}, ${sat}%, ${lightness}%, ${opacity})`);
-                    grad.addColorStop(0.6, `hsla(${hue}, ${sat}%, ${lightness}%, ${opacity * 0.3})`);
-                    grad.addColorStop(1, 'transparent');
+                    // Typing micro-interaction: Spawns temporary liquid that dissolves
+                    let _lastInputSpawn = 0;
+                    document.getElementById('chatInput').addEventListener('input', () => {
+                        const now = Date.now();
+                        if (now - _lastInputSpawn > 150) { _lastInputSpawn = now; this.addParticle(true); }
+                    });
 
-                    this.ctx.fillStyle = grad;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                });
-
-                requestAnimationFrame(this.animate);
-            }
-        }
-
-        window.bgEngine = new LiquidBackground();
-
-        // ---- INPUT CANVAS LIQUID ----
-        class InputLiquid {
-            constructor() {
-                this.wrapper = document.querySelector('.input-wrapper');
-                this.canvas = document.getElementById('inputCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.particles = [];
-                this.time = 0;
-
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-
-                for(let i=0; i<4; i++) {
-                    this.addParticle(false);
+                    this.animate();
                 }
 
-                document.getElementById('chatInput').addEventListener('input', () => {
-                    this.addParticle(true);
-                });
+                addParticle(isTyping = false) {
+                    if (this.particles.length > 8) this.particles.shift();
+                    
+                    // Logic upgrade: Dynamic color generation to match background engine
+                    const isLight = document.body.classList.contains('light-theme');
+                    const seed = Math.random() * 100;
+                    const hue = isLight 
+                        ? 200 + Math.sin(Date.now() * 0.001 + seed) * 80 
+                        : 180 + Math.sin(Date.now() * 0.001 + seed) * 50;
+                    
+                    this.particles.push({
+                        x: isTyping ? this.width * 0.8 : Math.random() * this.width,
+                        y: this.height / 2,
+                        r: isTyping ? 15 + Math.random() * 15 : 30 + Math.random() * 30,
+                        vx: (Math.random() - 0.5) * 3,
+                        vy: (Math.random() - 0.5) * 2,
+                        hue: hue,
+                        lightness: isLight ? 70 : 30,
+                        life: isTyping ? 1.2 : Infinity 
+                    });
+                }
 
-                this.animate();
+                resize() {
+                    const dpr = window.devicePixelRatio || 1;
+                    this.width = this.wrapper.clientWidth + 20;
+                    this.height = this.wrapper.clientHeight + 20;
+                    this.canvas.width = this.width * dpr;
+                    this.canvas.height = this.height * dpr;
+                    this.ctx.scale(dpr, dpr);
+                }
+
+                animate() {
+                    this.time += 0.005;
+                    const now = performance.now();
+                    if (!this._lastFrame) this._lastFrame = 0;
+                    if (now - this._lastFrame < 33) { requestAnimationFrame(() => this.animate()); return; }
+                    this._lastFrame = now;
+                    this.ctx.clearRect(0, 0, this.width, this.height);
+
+                    const isLight = document.body.classList.contains('light-theme');
+
+                    for (let i = this.particles.length - 1; i >= 0; i--) {
+                        let p = this.particles[i];
+
+                        const noise = Math.sin(p.x * 0.01 + this.time) * Math.cos(p.y * 0.01 + this.time);
+                        p.vx += Math.cos(noise * Math.PI) * 0.1;
+                        p.vy += Math.sin(noise * Math.PI) * 0.1;
+
+                        p.x += p.vx;
+                        p.y += p.vy;
+
+                        p.vx *= 0.95;
+                        p.vy *= 0.95;
+
+                        if (p.x < 0) { p.x = 0; p.vx *= -1; }
+                        if (p.x > this.width) { p.x = this.width; p.vx *= -1; }
+                        if (p.y < 0) { p.y = 0; p.vy *= -1; }
+                        if (p.y > this.height) { p.y = this.height; p.vy *= -1; }
+
+                        if (p.life !== Infinity) {
+                            p.life -= 0.015;
+                            p.r *= 0.98;
+                            if (p.life <= 0) {
+                                this.particles.splice(i, 1);
+                                continue;
+                            }
+                        }
+
+                        // Draw the glowing blob using HSL to match background engine exactly
+                        const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+                        const alpha = p.life !== Infinity ? Math.min(p.life, 0.6) : 0.4;
+                        
+                        // Adaptive lightness and saturation for liquid glass feel
+                        grad.addColorStop(0, `hsla(${p.hue}, 80%, ${p.lightness}%, ${alpha})`);
+                        grad.addColorStop(1, `hsla(${p.hue}, 80%, ${p.lightness}%, 0)`);
+                        
+                        this.ctx.fillStyle = grad;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+
+                    requestAnimationFrame(() => this.animate());
+                }
+            }
+            new InputLiquid();
+
+            // ---- 5. CHAT FUNCTIONALITY (Qwen3 Backend Integration) ----
+            const chatInput = document.getElementById('chatInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const messagesArea = document.getElementById('messagesArea');
+            const typingIndicator = document.getElementById('typingIndicator');
+            const ramTransferBanner = document.getElementById('ramTransferBanner');
+            const pageSessionId = (window.crypto && window.crypto.randomUUID)
+                ? window.crypto.randomUUID()
+                : `page-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+            function showRamTransferBanner(text) {
+                if (!ramTransferBanner) return;
+                ramTransferBanner.textContent = text;
+                ramTransferBanner.classList.add('active');
             }
 
-            addParticle(isTyping = false) {
-                if (this.particles.length > 15) this.particles.shift();
+            let isProcessing = false;
+            let abortController = null;
+            let thinkingOn = false;
+            let deepThinkOn = false;
+            let freeThinkOn = false;
+            let freeThinkAbort = null;
 
-                const isLight = document.body.classList.contains('light-theme');
-                const seed = Math.random() * 100;
-                const hue = isLight ? 200 + Math.sin(Date.now() * 0.001 + seed) * 80 : 180 + Math.sin(Date.now() * 0.001 + seed) * 50;
+            // ── Smart Scroll Anchor ──
+            // Only auto-scroll if user is within 80px of the bottom.
+            // If user scrolls up during streaming, stay pinned to their position.
+            let scrollPinned = true;
+            const SCROLL_THRESHOLD = 80;
 
-                this.particles.push({
-                    x: isTyping ? this.width * 0.8 : Math.random() * this.width,
-                    y: this.height / 2,
-                    r: isTyping ? 15 + Math.random() * 15 : 30 + Math.random() * 30,
-                    vx: (Math.random() - 0.5) * 3,
-                    vy: (Math.random() - 0.5) * 2,
-                    hue: hue,
-                    lightness: isLight ? 70 : 30,
-                    life: isTyping ? 1.2 : Infinity
-                });
+            messagesArea.addEventListener('scroll', () => {
+                const distFromBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight;
+                scrollPinned = distFromBottom <= SCROLL_THRESHOLD;
+            }, { passive: true });
+
+            function smartScroll() {
+                if (scrollPinned) {
+                    messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'smooth' });
+                }
             }
 
-            resize = () => {
-                const dpr = window.devicePixelRatio || 1;
-                this.width = this.wrapper.clientWidth + 20;
-                this.height = this.wrapper.clientHeight + 20;
-                this.canvas.width = this.width * dpr;
-                this.canvas.height = this.height * dpr;
-                this.ctx.scale(dpr, dpr);
+            // ── Escape HTML ──
+            function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+            // ── Status Polling ──
+            async function pollStatus() {
+                try {
+                    const r = await fetch('/api/status');
+                    const d = await r.json();
+                    if (d.thinking_on !== undefined) { thinkingOn = d.thinking_on; syncThinkUI(); }
+                    if (d.deep_think_on !== undefined) { deepThinkOn = d.deep_think_on; syncDeepThinkUI(); }
+                    if (d.free_think_on !== undefined) { freeThinkOn = d.free_think_on; syncFreeThinkUI(); }
+                    if (d.free_think_state) { updateFreeThinkStats(d.free_think_state); }
+                } catch {}
             }
+            setInterval(pollStatus, 6000);
+            pollStatus();
 
-            animate = () => {
-                this.time += 0.005;
-                this.ctx.clearRect(0, 0, this.width, this.height);
+            // ── Think Toggle ──
+            function syncThinkUI() {
+                const sw = document.getElementById('thinkSwitch');
+                const label = document.getElementById('thinkModeLabel');
+                if (sw) { thinkingOn ? sw.classList.add('active') : sw.classList.remove('active'); }
+                if (label) label.textContent = thinkingOn ? 'Thinking Mode' : 'Instant Mode';
+            }
+            async function toggleThink() {
+                try {
+                    const r = await fetch('/api/toggle_think', { method: 'POST' });
+                    const d = await r.json();
+                    thinkingOn = d.thinking_on;
+                    syncThinkUI();
+                } catch {}
+            }
+            document.getElementById('thinkSwitch')?.addEventListener('click', function(e) { e.stopPropagation(); toggleThink(); });
 
-                const isLight = document.body.classList.contains('light-theme');
+            // ── Deep Think Toggle ──
+            function syncDeepThinkUI() {
+                const sw = document.getElementById('deepThinkSwitch');
+                const label = document.getElementById('deepThinkLabel');
+                if (sw) { deepThinkOn ? sw.classList.add('active') : sw.classList.remove('active'); }
+                if (label) label.textContent = deepThinkOn ? 'Deep Think ● ON' : 'Deep Think';
+                // Visual indicator: pulse the icon when active
+                const icon = document.querySelector('#deepThinkItem .ph-atom');
+                if (icon) icon.style.animation = deepThinkOn ? 'pulse 2s infinite' : 'none';
+            }
+            function flashDeepThinkBanner() {
+                const banner = document.getElementById('deepThinkBanner');
+                if (banner) {
+                    banner.classList.add('active');
+                    setTimeout(() => { banner.classList.remove('active'); }, 3000);
+                }
+            }
+            async function toggleDeepThink() {
+                try {
+                    const r = await fetch('/api/toggle_deep_think', { method: 'POST' });
+                    const d = await r.json();
+                    deepThinkOn = d.deep_think_on;
+                    syncDeepThinkUI();
+                    if (deepThinkOn) flashDeepThinkBanner();
+                    // When toggling deep think, start a fresh conversation
+                    clearChatUI();
+                } catch {}
+            }
+            document.getElementById('deepThinkSwitch')?.addEventListener('click', function(e) { e.stopPropagation(); toggleDeepThink(); });
 
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    let p = this.particles[i];
-                    const noise = Math.sin(p.x * 0.01 + this.time) + Math.cos(p.y * 0.01 + this.time);
-                    p.vx += Math.cos(noise * Math.PI) * 0.1;
-                    p.vy += Math.sin(noise * Math.PI) * 0.1;
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.95;
-                    p.vy *= 0.95;
+            // ── Free Think Toggle ──
+            function syncFreeThinkUI() {
+                const sw = document.getElementById('freeThinkSwitch');
+                const label = document.getElementById('freeThinkLabel');
+                const banner = document.getElementById('freeThinkBanner');
+                if (sw) { freeThinkOn ? sw.classList.add('active') : sw.classList.remove('active'); }
+                if (label) label.textContent = freeThinkOn ? 'Free Think ● ON' : 'Free Think';
+                const icon = document.querySelector('#freeThinkItem .ph-infinity');
+                if (icon) icon.style.animation = freeThinkOn ? 'infinitySpin 3s ease-in-out infinite' : 'none';
+                const stats = document.getElementById('freeThinkStats');
+                if (banner) {
+                    freeThinkOn ? banner.classList.add('active') : banner.classList.remove('active');
+                }
+                if (stats) {
+                    if (freeThinkOn) {
+                        stats.classList.remove('hidden');
+                        stats.classList.add('active');
+                    } else {
+                        stats.classList.remove('active');
+                        stats.classList.add('hidden');
+                    }
+                }
+            }
+            function updateFreeThinkStats(state) {
+                const el = document.getElementById('freeThinkStats');
+                if (el && state) el.textContent = `Cycle: ${state.cycle}/${state.max_cycles} \u00b7 Memory: ${state.memory_entries}`;
+            }
+            function flashFreeThinkBanner() {
+                const banner = document.getElementById('freeThinkBanner');
+                if (banner) {
+                    banner.classList.add('active');
+                }
+            }
+            async function toggleFreeThink() {
+                try {
+                    const r = await fetch('/api/toggle_free_think', { method: 'POST' });
+                    const d = await r.json();
+                    freeThinkOn = d.free_think_on;
+                    syncFreeThinkUI();
+                    if (freeThinkOn) {
+                        flashFreeThinkBanner();
+                        clearChatUI();
+                        startFreeThinkStream();
+                    } else {
+                        stopFreeThink();
+                    }
+                } catch {}
+            }
+            async function stopFreeThink() {
+                try { await fetch('/api/free_think_stop', { method: 'POST' }); } catch {}
+                if (freeThinkAbort) { freeThinkAbort.abort(); freeThinkAbort = null; }
+            }
+            async function startFreeThinkStream() {
+                freeThinkAbort = new AbortController();
+                isProcessing = true;
+                stopBtn.classList.add('active');
 
-                    if (p.x < 0) { p.x = 0; p.vx *= -1; }
-                    if (p.x > this.width) { p.x = this.width; p.vx *= -1; }
-                    if (p.y < 0) { p.y = 0; p.vy *= -1; }
-                    if (p.y > this.height) { p.y = this.height; p.vy *= -1; }
+                if (isFirstMessage) showChatView();
 
-                    if (p.life !== Infinity) {
-                        p.life -= 0.015;
-                        p.r *= 0.98;
-                        if (p.life <= 0) {
-                            this.particles.splice(i, 1);
-                            continue;
+                let streamEl = null;
+                let parser = null;
+
+                try {
+                    const resp = await fetch('/api/free_think_stream', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: '{}',
+                        signal: freeThinkAbort.signal
+                    });
+                    const reader = resp.body.getReader();
+                    const dec = new TextDecoder();
+                    let sseBuffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        sseBuffer += dec.decode(value, { stream: true });
+                        const lines = sseBuffer.split('\n');
+                        sseBuffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
+                            try {
+                                const data = JSON.parse(line.slice(6));
+
+                                if (data.cycle_start) {
+                                    streamEl = createStreamingMessage();
+                                    parser = new StreamParser(streamEl);
+                                    const cycleTag = document.createElement('div');
+                                    cycleTag.style.cssText = 'font-size:0.65rem;color:#a78bfa;padding:2px 8px;background:rgba(167,139,250,0.1);border-radius:8px;display:inline-block;margin-bottom:6px;';
+                                    cycleTag.textContent = `\u267e Cycle ${data.cycle_start} \u00b7 Memory: ${data.memory_entries}`;
+                                    streamEl.querySelector('.message').prepend(cycleTag);
+                                }
+                                if (data.chunk && parser) {
+                                    parser.feed(data.chunk);
+                                    smartScroll();
+                                }
+                                if (data.compressing && streamEl) {
+                                    const tag = document.createElement('div');
+                                    tag.style.cssText = 'font-size:0.6rem;color:var(--text-muted);margin-top:4px;font-style:italic;';
+                                    tag.textContent = '\u2696 Compressing thought...';
+                                    streamEl.querySelector('.message').appendChild(tag);
+                                }
+                                if (data.compressed && streamEl) {
+                                    const tag = document.createElement('div');
+                                    tag.style.cssText = 'font-size:0.6rem;color:#a78bfa;margin-top:2px;padding:3px 8px;background:rgba(167,139,250,0.06);border-radius:6px;';
+                                    tag.textContent = `\uD83D\uDDDC ${data.compressed}`;
+                                    streamEl.querySelector('.message').appendChild(tag);
+                                    updateFreeThinkStats({ cycle: data.memory_entries, max_cycles: 100, memory_entries: data.memory_entries });
+                                }
+                                if (data.cycle_done && parser) {
+                                    parser.flush();
+                                    const tb = streamEl?.querySelector('.think-block');
+                                    if (tb && tb.style.display !== 'none') {
+                                        const body = tb.querySelector('.think-block-body');
+                                        const arrow = tb.querySelector('.think-arrow');
+                                        if (body) body.style.display = 'none';
+                                        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+                                    }
+                                }
+                                if (data.done) {
+                                    if (parser) parser.flush();
+                                }
+                                if (data.error) {
+                                    if (streamEl) streamEl.querySelector('.answer-block').textContent = '\u26A0 ' + data.error;
+                                }
+                            } catch {}
                         }
                     }
-
-                    const grad = this.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-                    const alpha = p.life !== Infinity ? Math.min(p.life, 0.6) : 0.4;
-                    grad.addColorStop(0, `hsla(${p.hue}, 80%, ${p.lightness}%, ${alpha})`);
-                    grad.addColorStop(1, `hsla(${p.hue}, 80%, ${p.lightness}%, 0)`);
-
-                    this.ctx.fillStyle = grad;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    this.ctx.fill();
+                } catch (err) {
+                    if (err.name !== 'AbortError' && streamEl) {
+                        streamEl.querySelector('.answer-block').textContent = '\u26A0 ' + err.message;
+                    }
                 }
 
-                requestAnimationFrame(this.animate);
-            }
-        }
-
-        new InputLiquid();
-
-        // ---- CHAT FUNCTIONALITY ----
-        const chatInput = document.getElementById('chatInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const messagesArea = document.getElementById('messagesArea');
-        const typingIndicator = document.getElementById('typingIndicator');
-
-        function appendMessage(text, type) {
-            const wrapper = document.createElement('div');
-            wrapper.className = `message-wrapper ${type}`;
-
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-            let actionBarHtml = type === 'received' ? `
-                <button class="action-btn"><i class="ph ph-copy"></i></button>
-                <button class="action-btn"><i class="ph ph-arrows-clockwise"></i></button>
-                <button class="action-btn"><i class="ph ph-thumbs-up"></i></button>
-                <button class="action-btn"><i class="ph ph-pencil-simple"></i></button>
-            ` : '';
-
-            wrapper.innerHTML = `
-                <div class="message">${text}</div>
-                <div class="message-meta">
-                    <span class="timestamp">${time}</span>
-                    <div class="action-bar">${actionBarHtml}</div>
-                </div>
-            `;
-
-            messagesArea.insertBefore(wrapper, typingIndicator);
-            messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'smooth' });
-        }
-
-        let isProcessing = false;
-
-        function sendMessage() {
-            if (isProcessing) return;
-
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            isProcessing = true;
-            sendBtn.style.opacity = '0.5';
-            sendBtn.style.pointerEvents = 'none';
-
-            if (isFirstMessage) {
-                isFirstMessage = false;
-                const tl = gsap.timeline();
-                tl.to(emptyState, { opacity: 0, y: -20, duration: 0.3, display: 'none' })
-                  .to(messagesArea, { display: 'flex', opacity: 1, duration: 0.4 }, '-0.1');
-                inputControls.classList.remove('centered-state');
-                gsap.to(inputControls, { marginBottom: 0, duration: 0.4 });
-            }
-
-            appendMessage(text, 'sent');
-            chatInput.value = '';
-            chatInput.focus();
-
-            typingIndicator.style.display = 'flex';
-            messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'smooth' });
-
-            const responses = [
-                "I've updated the UI based on those parameters.",
-                "Surgical fix applied. The layout is now perfectly aligned.",
-                "Understood. The GSAP transitions have been calibrated.",
-                "Here is the refined data you requested."
-            ];
-            const randomReply = responses[Math.floor(Math.random() * responses.length)];
-            const thinkTime = 800 + Math.random() * 1000;
-
-            setTimeout(() => {
-                typingIndicator.style.display = 'none';
-                appendMessage(randomReply, 'received');
+                freeThinkAbort = null;
                 isProcessing = false;
-                sendBtn.style.opacity = '1';
-                sendBtn.style.pointerEvents = 'all';
-            }, thinkTime);
-        }
-
-        const micBtn = document.getElementById('micBtn');
-        micBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            console.log('Microphone clicked independently.');
-        });
-
-        sendBtn.addEventListener('click', sendMessage);
-
-        chatInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+                stopBtn.classList.remove('active');
             }
-        });
+            document.getElementById('freeThinkSwitch')?.addEventListener('click', function(e) { e.stopPropagation(); toggleFreeThink(); });
 
-        document.getElementById('newChatBtn').addEventListener('click', () => {
-            isFirstMessage = true;
+            // ── Clear chat UI helper (no input movement) ──
+            function clearChatUI() {
+                const bubbles = messagesArea.querySelectorAll('.message-wrapper');
+                bubbles.forEach(b => b.remove());
+                showEmptyState();
+            }
 
-            const bubbles = messagesArea.querySelectorAll('.message-wrapper');
-            bubbles.forEach(b => b.remove());
+            // ── Copy helper ──
+            window.copyMsg = function(btn) {
+                const msg = btn.closest('.message-wrapper')?.querySelector('.message');
+                if (msg) navigator.clipboard.writeText(msg.textContent);
+            };
 
-            inputControls.classList.add('centered-state');
-            gsap.to(inputControls, { backgroundColor: 'transparent', marginBottom: '2vh', duration: 0.4 });
+            // ── Append simple message ──
+            function appendMessage(text, type) {
+                const wrapper = document.createElement('div');
+                wrapper.className = `message-wrapper ${type}`;
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                let actionBarHtml = type === 'received'
+                    ? `<button class="action-btn" onclick="copyMsg(this)"><i class="ph ph-copy"></i></button>
+                       <button class="action-btn"><i class="ph ph-thumbs-up"></i></button>`
+                    : `<button class="action-btn"><i class="ph ph-pencil-simple"></i></button>`;
+                wrapper.innerHTML = `
+                    <div class="message">${escHtml(text)}</div>
+                    <div class="message-meta">
+                        <span class="timestamp">${time}</span>
+                        <div class="action-bar">${actionBarHtml}</div>
+                    </div>
+                `;
+                messagesArea.insertBefore(wrapper, typingIndicator);
+                smartScroll();
+            }
 
-            const resetTl = gsap.timeline();
-            resetTl.to(messagesArea, { opacity: 0, duration: 0.2, display: 'none' })
-                   .fromTo(emptyState, { y: 20, opacity: 0 }, { display: 'flex', y: 0, opacity: 1, duration: 0.4 });
+            // ── Create streaming assistant message with think/answer sections ──
+            function createStreamingMessage() {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper received';
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <div class="think-block" style="display:none;">
+                            <div class="think-block-header" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:6px;">
+                                <span style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--accent);">\uD83D\uDCAD Reasoning</span>
+                                <span class="think-arrow" style="transition:transform 0.2s;">\u25BC</span>
+                            </div>
+                            <div class="think-block-body" style="font-size:0.85rem;color:var(--text-muted);font-style:italic;border-left:2px solid var(--accent);padding-left:12px;white-space:pre-wrap;"></div>
+                        </div>
+                        <div class="answer-block" style="white-space:pre-wrap;"></div>
+                    </div>
+                    <div class="message-meta">
+                        <span class="timestamp">${time}</span>
+                        <div class="action-bar">
+                            <button class="action-btn" onclick="copyMsg(this)"><i class="ph ph-copy"></i></button>
+                            <button class="action-btn"><i class="ph ph-thumbs-up"></i></button>
+                        </div>
+                    </div>
+                `;
+                const hdr = wrapper.querySelector('.think-block-header');
+                hdr.addEventListener('click', () => {
+                    const body = wrapper.querySelector('.think-block-body');
+                    const arrow = wrapper.querySelector('.think-arrow');
+                    const hidden = body.style.display === 'none';
+                    body.style.display = hidden ? 'block' : 'none';
+                    arrow.style.transform = hidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+                });
+                messagesArea.insertBefore(wrapper, typingIndicator);
+                return wrapper;
+            }
 
-            const newItem = document.createElement('div');
-            newItem.className = 'menu-item active';
-            const icon = document.createElement('i');
-            icon.className = 'ph ph-chat-circle';
-            const textNode = document.createTextNode(' New Conversation');
-            newItem.appendChild(icon);
-            newItem.appendChild(textNode);
-
-            document.querySelectorAll('.menu-list .menu-item').forEach(item => {
-                if (!item.querySelector('.ph-key') && !item.querySelector('.ph-user-circle') &&
-                    !item.querySelector('.ph-folder') && !item.querySelector('.ph-star')) {
-                    item.classList.remove('active');
+            // ── Stream Parser for <think>/</think> tags ──
+            class StreamParser {
+                constructor(el) {
+                    this.thinkEl = el.querySelector('.think-block');
+                    this.thinkBody = el.querySelector('.think-block-body');
+                    this.answerEl = el.querySelector('.answer-block');
+                    this.buffer = '';
+                    this.inThink = false;
+                    this.thinkText = '';
+                    this.answerText = '';
                 }
+                feed(chunk) { this.buffer += chunk; this._parse(); }
+                _parse() {
+                    while (true) {
+                        if (this.inThink) {
+                            const end = this.buffer.indexOf('</think>');
+                            if (end === -1) {
+                                const safe = this.buffer.length - 8;
+                                if (safe > 0) { this.thinkText += this.buffer.substring(0, safe); this.buffer = this.buffer.substring(safe); this._renderThink(); }
+                                break;
+                            }
+                            this.thinkText += this.buffer.substring(0, end);
+                            this.buffer = this.buffer.substring(end + 8);
+                            this.inThink = false;
+                            this._renderThink();
+                        } else {
+                            const start = this.buffer.indexOf('<think>');
+                            if (start === -1) {
+                                const safe = this.buffer.length - 7;
+                                if (safe > 0) { this.answerText += this.buffer.substring(0, safe); this.buffer = this.buffer.substring(safe); this._renderAnswer(); }
+                                break;
+                            }
+                            this.answerText += this.buffer.substring(0, start);
+                            this.buffer = this.buffer.substring(start + 7);
+                            this.inThink = true;
+                            this._renderAnswer();
+                        }
+                    }
+                }
+                flush() {
+                    if (this.buffer) { if (this.inThink) this.thinkText += this.buffer; else this.answerText += this.buffer; this.buffer = ''; }
+                    this._renderThink(); this._renderAnswer();
+                }
+                _renderThink() { if (this.thinkText.trim()) { this.thinkEl.style.display = 'block'; this.thinkBody.textContent = this.thinkText; } }
+                _renderAnswer() { this.answerEl.textContent = this.answerText; }
+            }
+
+            // ── Stop generation (graceful: only stops current stream, keeps chat alive) ──
+            async function doStop() {
+                if (freeThinkOn) {
+                    await stopFreeThink();
+                    return;
+                }
+                if (abortController) {
+                    try {
+                        const endpoint = deepThinkOn ? '/api/deep_stop' : '/api/stop';
+                        await fetch(endpoint, { method: 'POST' });
+                    } catch {}
+                    abortController.abort();
+                    abortController = null;
+                }
+            }
+            stopBtn.addEventListener('click', doStop);
+
+            // ── Send Message (real streaming) ──
+            async function sendMessage() {
+                if (isProcessing) return;
+                const text = chatInput.value.trim();
+                if (!text) return;
+
+                isProcessing = true;
+                sendBtn.style.opacity = "0.5";
+                sendBtn.style.pointerEvents = "none";
+                stopBtn.classList.add('active');
+                abortController = new AbortController();
+
+                if (isFirstMessage) {
+                    showChatView();
+                    inputControls.classList.remove('centered-state');
+                }
+
+                appendMessage(text, 'sent');
+                chatInput.value = '';
+                chatInput.focus();
+
+                typingIndicator.style.display = 'flex';
+                scrollPinned = true;  // Re-pin on new message send
+                smartScroll();
+
+                const streamEl = createStreamingMessage();
+                typingIndicator.style.display = 'none';
+
+                try {
+                    const chatEndpoint = deepThinkOn ? '/api/deep_chat' : '/api/chat';
+                    const resp = await fetch(chatEndpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text, page_session_id: pageSessionId }),
+                        signal: abortController.signal
+                    });
+
+                    const reader = resp.body.getReader();
+                    const dec = new TextDecoder();
+                    const parser = new StreamParser(streamEl);
+                    let sseBuffer = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        sseBuffer += dec.decode(value, { stream: true });
+                        const lines = sseBuffer.split('\n');
+                        sseBuffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (!line.startsWith('data: ')) continue;
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.tools_triggered) {
+                                    data.tools_triggered.forEach(t => {
+                                        const badge = document.createElement('div');
+                                        badge.style.cssText = 'font-size:0.7rem;color:var(--accent);padding:2px 8px;background:rgba(99,102,241,0.1);border-radius:8px;display:inline-block;margin-bottom:6px;margin-right:4px;';
+                                        badge.textContent = '\uD83D\uDD27 ' + t.name;
+                                        streamEl.querySelector('.message').prepend(badge);
+                                    });
+                                }
+                                if (data.ram_transfer) {
+                                    const rt = data.ram_transfer;
+                                    const statusText = rt.retrieval_performed
+                                        ? `Session retrieval ${rt.retrieval_ms} ms | Query #${rt.query_index} | matched=${rt.retrieved_count} | top similarity=${rt.top_similarity} | RAM ${rt.ram_percent}% (${rt.ram_available_mb} MB free)`
+                                        : `No relevant memory match | Query #${rt.query_index} | RAM ${rt.ram_percent}% (${rt.ram_available_mb} MB free)`;
+                                    showRamTransferBanner(statusText);
+                                }
+                                if (data.chunk) {
+                                    parser.feed(data.chunk);
+                                    smartScroll();
+                                }
+                                if (data.query_metrics) {
+                                    const qm = data.query_metrics;
+                                    showRamTransferBanner(
+                                        `Completed Query #${qm.query_index} | generation ${qm.generation_ms} ms | retrieval ${qm.last_retrieval_ms} ms | retrieved=${qm.retrieved_count} | stored turns=${qm.stored_turns}`
+                                    );
+                                }
+                                if (data.done) {
+                                    parser.flush();
+                                    const tb = streamEl.querySelector('.think-block');
+                                    if (tb && tb.style.display !== 'none') {
+                                        const body = tb.querySelector('.think-block-body');
+                                        const arrow = tb.querySelector('.think-arrow');
+                                        if (body) body.style.display = 'none';
+                                        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+                                    }
+                                }
+                                if (data.error) {
+                                    streamEl.querySelector('.answer-block').textContent = '\u26A0 ' + data.error;
+                                }
+                            } catch {}
+                        }
+                    }
+                    parser.flush();
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        const ans = streamEl.querySelector('.answer-block');
+                        if (ans && !ans.textContent.trim()) ans.textContent = '(stopped)';
+                    } else {
+                        streamEl.querySelector('.answer-block').textContent = '\u26A0 ' + err.message;
+                    }
+                }
+
+                abortController = null;
+                isProcessing = false;
+                sendBtn.style.opacity = "1";
+                sendBtn.style.pointerEvents = "all";
+                stopBtn.classList.remove('active');
+                chatInput.focus();
+                pollStatus();
+            }
+
+            // Handle Microphone separately to prevent input wrapper activation
+            const micBtn = document.getElementById('micBtn');
+            micBtn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
             });
 
-            const labels = document.querySelectorAll('.history-label');
-            const recentChatsLabel = Array.from(labels).find(label => label.textContent.includes('RECENT CHATS'));
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keydown', (e) => { 
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage(); 
+                } 
+            });
 
-            if (recentChatsLabel && recentChatsLabel.nextElementSibling) {
-                menuList.insertBefore(newItem, recentChatsLabel.nextElementSibling);
-            } else {
-                menuList.appendChild(newItem);
-            }
+            document.getElementById('newChatBtn').addEventListener('click', async () => {
+                try {
+                    await fetch('/api/new_chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ page_session_id: pageSessionId })
+                    });
+                    showRamTransferBanner('Session memory reset for this page.');
+                } catch {}
+                const bubbles = messagesArea.querySelectorAll('.message-wrapper');
+                bubbles.forEach(b => b.remove());
+                showEmptyState();
 
-            gsap.fromTo(newItem, { x: -10, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3 });
+                const menuList = document.querySelector('.menu-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'menu-item active';
+                newItem.innerHTML = '<i class="ph ph-chat-circle"></i> New conversation';
+                document.querySelectorAll('.menu-list .menu-item').forEach(item => item.classList.remove('active'));
+                const labels = document.querySelectorAll('.history-label');
+                const chatsLabel = Array.from(labels).find(label => label.textContent.includes('CHATS'));
+                if (chatsLabel && chatsLabel.nextElementSibling) {
+                    menuList.insertBefore(newItem, chatsLabel.nextElementSibling);
+                } else {
+                    menuList.appendChild(newItem);
+                }
+                gsap.fromTo(newItem, { x: -10, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3 });
+            });
 
-            // Attach event listeners to the new item
-            attachContextMenu();
-            attachPreviewTooltip();
-            attachMenuItemSelection();
+            
+            
+        })();
+              class ButtonGlassEngine {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if (!this.canvas) return;
+        
+        this.width = this.canvas.parentElement.clientWidth;
+        this.height = this.canvas.parentElement.clientHeight;
+
+        this.scene = new THREE.Scene();
+        
+        this.renderer = new THREE.WebGLRenderer({ 
+            canvas: this.canvas, 
+            alpha: true,        // Keep canvas background transparent
+            antialias: true 
+        });
+        this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 100);
+        this.camera.position.z = 3.5;
+
+        // Perfectly smooth sphere
+        this.geometry = new THREE.SphereGeometry(1.2, 64, 64); 
+        
+        // 1. New High-Contrast Environment Map to give the droplet glossy streaks
+        this.bgTexture = new THREE.CanvasTexture(this.generateGradientCanvas());
+
+        // 2. The Middle-Ground Material (Glossy edge, transparent core)
+        this.material = new THREE.MeshPhysicalMaterial({
+            color: 0xddf5ff,        // Very faint icy cyan tint
+            metalness: 0.1,         // Tiny bit of metalness helps define the edge
+            roughness: 0.0,         // Perfectly smooth
+            transmission: 0.9,      // High glass transmission
+            thickness: 0.5,         // Moderate thickness
+            envMap: this.bgTexture,
+            envMapIntensity: 2.5,   // Strong reflections to define the surface
+            clearcoat: 1.0,         // Extra glossy outer layer
+            clearcoatRoughness: 0.0,
+            transparent: true,
+            opacity: 0.65           // CRUCIAL: 65% opaque allows the HTML behind it to show!
         });
 
-        class ButtonGlassEngine {
-            constructor(canvasId) {
-                this.canvas = document.getElementById(canvasId);
-                if (!this.canvas) return;
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.scene.add(this.mesh);
 
-                this.width = this.canvas.parentElement.clientWidth;
-                this.height = this.canvas.parentElement.clientHeight;
+        this.seed = Math.random() * 100;
 
-                this.scene = new THREE.Scene();
-                this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, alpha: true, antialias: true });
-                this.renderer.setSize(this.width, this.height);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        // 3. Rim Lighting (This is what draws the border of the liquid!)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambientLight);
 
-                this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 0.1, 100);
-                this.camera.position.z = 3.5;
+        // Top-left main highlight
+        const topLight = new THREE.DirectionalLight(0xffffff, 2.0); 
+        topLight.position.set(2, 5, 2); 
+        this.scene.add(topLight);
 
-                this.geometry = new THREE.SphereGeometry(1.2, 64, 64);
+        // Bottom-right adaptive rim light
+        this.rimLight = new THREE.DirectionalLight(0x00d0ff, 3.0);
+        this.rimLight.position.set(-4, -4, -2);
+        this.scene.add(this.rimLight);
 
-                this.bgTexture = new THREE.CanvasTexture(this.generateGradientCanvas());
+        this.animate();
+    }
 
-                this.material = new THREE.MeshPhysicalMaterial({
-                    color: 0xddf5ff,
-                    metalness: 0.1,
-                    roughness: 0.0,
-                    transmission: 0.9,
-                    thickness: 0.5,
-                    envMap: this.bgTexture,
-                    envMapIntensity: 2.5,
-                    clearcoat: 1.0,
-                    clearcoatRoughness: 0.0,
-                    transparent: true,
-                    opacity: 0.65
-                });
+    generateGradientCanvas(hue = 190) {
+        const c = document.createElement('canvas');
+        c.width = 128; c.height = 128;
+        const ctx = c.getContext('2d');
+        
+        const grad = ctx.createLinearGradient(0, 0, 0, 128);
+        grad.addColorStop(0, '#ffffff');                
+        grad.addColorStop(0.15, 'rgba(255,255,255,0)'); 
+        grad.addColorStop(0.8, `hsla(${hue}, 100%, 50%, 0)`);    
+        grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 1)`);                
+        
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,128,128);
+        return c;
+    }
 
-                this.mesh = new THREE.Mesh(this.geometry, this.material);
-                this.scene.add(this.mesh);
+    // Samples a small region of bgCanvas at this button's screen position
+    // Returns { r, g, b } averaged over a radius of pixels
+    sampleBackgroundAt() {
+        const bgCanvas = document.getElementById('bgCanvas');
+        if (!bgCanvas) return null;
 
-                this.seed = Math.random() * 100;
+        const bgCtx = bgCanvas.getContext('2d');
+        const rect = this.canvas.parentElement.getBoundingClientRect();
 
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                this.scene.add(ambientLight);
+        // Centre of the button in screen space
+        const cx = Math.round(rect.left + rect.width  / 2);
+        const cy = Math.round(rect.top  + rect.height / 2);
 
-                const topLight = new THREE.DirectionalLight(0xffffff, 2.0);
-                topLight.position.set(2, 5, 2);
-                this.scene.add(topLight);
+        // Sample radius — small enough to be cheap, large enough to be stable
+        const r = 24;
+        const x = Math.max(0, cx - r);
+        const y = Math.max(0, cy - r);
+        const size = r * 2;
 
-                this.rimLight = new THREE.DirectionalLight(0x00d0ff, 3.0);
-                this.rimLight.position.set(-4, -4, -2);
-                this.scene.add(this.rimLight);
+        let data;
+        try {
+            data = bgCtx.getImageData(x, y, size, size).data;
+        } catch (e) {
+            return null; // Cross-origin guard
+        }
 
-                this.animate();
-            }
+        let rSum = 0, gSum = 0, bSum = 0, count = 0;
+        for (let i = 0; i < data.length; i += 4) {
+            rSum += data[i];
+            gSum += data[i + 1];
+            bSum += data[i + 2];
+            count++;
+        }
 
-            generateGradientCanvas(hue = 190) {
-                const c = document.createElement('canvas');
-                c.width = 128;
-                c.height = 128;
-                const ctx = c.getContext('2d');
-                const grad = ctx.createLinearGradient(0, 0, 0, 128);
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(0.15, 'rgba(255,255,255,0)');
-                grad.addColorStop(0.8, `hsla(${hue}, 100%, 50%, 0)`);
-                grad.addColorStop(1, `hsla(${hue}, 100%, 50%, 1)`);
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, 128, 128);
-                return c;
-            }
+        return {
+            r: rSum / count / 255,
+            g: gSum / count / 255,
+            b: bSum / count / 255
+        };
+    }
 
-            animate = () => {
-                const t = Date.now() * 0.001 + this.seed;
-                this.mesh.rotation.x = Math.sin(t * 0.3) * 0.2;
-                this.mesh.rotation.y = Math.cos(t * 0.2) * 0.3;
-                this.renderer.render(this.scene, this.camera);
-                requestAnimationFrame(this.animate);
+    // Rebuilds the envMap gradient texture using a live-sampled color
+    updateEnvMap(r, g, b) {
+        const c = document.createElement('canvas');
+        c.width = 128; c.height = 128;
+        const ctx = c.getContext('2d');
+
+        const hiR = Math.min(1, r * 1.8), hiG = Math.min(1, g * 1.8), hiB = Math.min(1, b * 1.8);
+        const toHex = v => Math.round(v * 255).toString(16).padStart(2, '0');
+        const rimColorHi  = `#${toHex(hiR)}${toHex(hiG)}${toHex(hiB)}`;
+
+        const grad = ctx.createLinearGradient(0, 0, 0, 128);
+        grad.addColorStop(0,    '#ffffff');         
+        grad.addColorStop(0.15, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.8,  'rgba(0,0,0,0)');
+        grad.addColorStop(1,    rimColorHi);        
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 128, 128);
+
+        if (this.material.envMap) this.material.envMap.dispose();
+        this.material.envMap = new THREE.CanvasTexture(c);
+        this.material.needsUpdate = true;
+
+        this.rimLight.color.setRGB(Math.min(1, r * 2.5), Math.min(1, g * 2.5), Math.min(1, b * 2.5));
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const now = performance.now();
+        if (!this._lastFrame) this._lastFrame = 0;
+        if (now - this._lastFrame < 66) return; // cap ~15fps
+        this._lastFrame = now;
+
+        const time = Date.now() * 0.003;
+
+        // Spatial sample — runs every frame at 15fps, much cheaper
+        if (!this._sampleCount) this._sampleCount = 0;
+        this._sampleCount++;
+        if (this._sampleCount % 4 === 0) { // only sample bg every 4th frame
+            const sample = this.sampleBackgroundAt();
+            if (sample) {
+                const dr = Math.abs(sample.r - (this._lastSample?.r ?? -1));
+                const dg = Math.abs(sample.g - (this._lastSample?.g ?? -1));
+                const db = Math.abs(sample.b - (this._lastSample?.b ?? -1));
+
+                if (dr + dg + db > 0.015) {  
+                    this.updateEnvMap(sample.r, sample.g, sample.b);
+                    this._lastSample = sample;
+                }
             }
         }
 
-        new ButtonGlassEngine('menuGlassCanvas');
-        new ButtonGlassEngine('sendGlassCanvas');
+        // Subtle, organic liquid breathing
+        this.mesh.scale.x = 1 + Math.sin(time) * 0.04;
+        this.mesh.scale.y = 1 + Math.cos(time * 0.8) * 0.04;
+        this.mesh.scale.z = 1 + Math.sin(time * 1.2) * 0.04;
 
-        initCrystalEdges();
+        this.mesh.rotation.x += 0.002;
+        this.mesh.rotation.y += 0.005;
+
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
+// Initialize the 3D button
+new ButtonGlassEngine('sendGlassCanvas');
+// Initialize the 3D menu toggle button
+new ButtonGlassEngine('menuGlassCanvas');
+// Initialize the 3D stop button
+let stopGlassEngine = null;
+const stopBtnEl = document.getElementById('stopBtn');
+const stopObserver = new MutationObserver(() => {
+    if (stopBtnEl.classList.contains('active') && !stopGlassEngine) {
+        stopGlassEngine = new ButtonGlassEngine('stopGlassCanvas');
+    }
+});
+stopObserver.observe(stopBtnEl, { attributes: true, attributeFilter: ['class'] });
+
+    </script>
+    <script src="commit-engine.js"></script>
+    <script>
+    // Production layer: accept controlled state injections from Sandbox
+    window.addEventListener('message', function (e) {
+        if (!e.data || e.data.type !== 'phantom_state') return;
+        const p = e.data.payload || {};
+
+        if (p.cssVars) {
+            Object.entries(p.cssVars).forEach(([k, v]) =>
+                document.documentElement.style.setProperty(k, v)
+            );
+        }
+        if (p.componentConfig) {
+            const blur = p.componentConfig.backdropBlur;
+            if (blur) {
+                const val = 'blur(' + blur + 'px) saturate(180%)';
+                document.querySelector('.app-container').style.backdropFilter = val;
+                document.querySelector('.app-container').style.webkitBackdropFilter = val;
+            }
+            const radius = p.componentConfig.borderRadius;
+            if (radius) document.querySelector('.app-container').style.borderRadius = radius + 'px';
+        }
+        if (p.featureFlags) {
+            const isLight = p.featureFlags.lightTheme;
+            if (typeof isLight === 'boolean') {
+                document.body.classList.toggle('light-theme', isLight);
+                if (window.bgEngine) window.bgEngine.updateTheme(isLight);
+            }
+            if (typeof p.featureFlags.liquidBackground === 'boolean' && window.bgEngine) {
+                window.bgEngine.setActive(p.featureFlags.liquidBackground);
+            }
+        }
+    });
+    </script>
+    <script>
+    // ── Live-reload: poll for file changes ──
+    (function() {
+        let knownVersion = null;
+        async function checkVersion() {
+            try {
+                const r = await fetch('/api/version', {cache: 'no-store'});
+                const d = await r.json();
+                if (knownVersion === null) { knownVersion = d.v; return; }
+                if (d.v !== knownVersion) location.reload();
+            } catch(e) {}
+        }
+        setInterval(checkVersion, 3000);
+    })();
     </script>
 </body>
 </html>
-

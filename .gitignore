@@ -19,5 +19,8 @@ gpu_cache/
 model_cache/
 models/
 
+# Flask session files
+.flask_session/
+
 # Optional local config overrides
 *.local.json
